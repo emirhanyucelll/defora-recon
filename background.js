@@ -1,5 +1,6 @@
-const BASE_URL = "http://localhost/defora-recon/shards/";
-let SHARD_CACHE = {}; 
+// DEFORA RECON - THE BRAIN (V60 - OMNIPOTENT)
+const BASE_URL = "https://emirhanyucelll.github.io/defora-recon/shards/";
+let SHARD_CACHE = {};
 
 async function getShard(name) {
     let prefix = name.substring(0, 2).toLowerCase();
