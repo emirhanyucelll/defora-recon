@@ -1,0 +1,1 @@
+{"p4":[{"id":"CVE-2022-25171","sev":"HIGH","r":[{"sInc":"0","eExc":"0.0.7"}],"src":"OSV"}],"p4assport-oatuh2":[{"id":"GHSA-h3wq-rm2v-c2jx","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"p4clients":[{"id":"GHSA-gchq-4839-p54f","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

@@ -1,0 +1,1 @@
+{"p-http":[{"id":"GHSA-mwj9-j9x9-2v9m","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"p-oauth2":[{"id":"GHSA-455h-rpfq-v888","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"p-traffic":[{"id":"MAL-2025-28635","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

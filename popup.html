@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="recon-hud">
+        <header>
+            <div class="brand">DEFORA <span>RECON</span></div>
+            <div id="riskBadge" class="status-badge status-secure">SECURE</div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="vulns">Zafiyetler</button>
+            <button class="tab-btn" data-tab="inventory">Envanter</button>
+            <button class="tab-btn" data-tab="security">Güvenlik</button>
+            <button class="tab-btn" data-tab="secrets">Sızıntılar</button>
+        </nav>
+
+        <main id="contentArea">
+            <!-- Zafiyet Paneli -->
+            <div id="tab-vulns" class="tab-pane active">
+                <div id="vulnList" class="list-container">
+                    <div class="empty-state">İstihbarat bekleniyor...</div>
+                </div>
+            </div>
+
+            <!-- Envanter Paneli -->
+            <div id="tab-inventory" class="tab-pane">
+                 <div class="summary-bar">Toplam Teknoloji: <span id="inventoryCount" style="color:var(--text-main)">0</span></div>
+                 <div id="inventoryList" class="list-container">
+                    <div class="empty-state">Tarama yapılıyor...</div>
+                 </div>
+            </div>
+
+            <!-- Güvenlik Paneli -->
+            <div id="tab-security" class="tab-pane">
+                 <div class="summary-bar">Güvenlik Puanı: <span id="securityScore" style="color:var(--accent)">--</span></div>
+                 <div id="securityList" class="list-container">
+                    <div class="empty-state">Analiz bekleniyor...</div>
+                 </div>
+            </div>
+
+            <!-- Sızıntı Paneli -->
+            <div id="tab-secrets" class="tab-pane">
+                <div class="summary-bar">Kritik Sızıntı Sayısı: <span id="secretCount" style="color:var(--danger)">0</span></div>
+                <div id="secretList" class="list-container">
+                    <div class="empty-state">Kod analizi bekleniyor...</div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div id="lastUpdate">STATUS: OPERATIONAL</div>
+            <button id="exportReport" style="background:var(--accent); color:white; border:none; padding:4px 12px; border-radius:4px; font-size:0.6rem; font-weight:900; cursor:pointer; box-shadow:0 0 10px var(--accent-glow);">EXPORT REPORT</button>
+        </footer>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

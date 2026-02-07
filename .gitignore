@@ -1,0 +1,11 @@
+storage/raw/*
+storage/extracted/*
+*.zip
+*.gz
+*.tar
+last_sync.txt
+.DS_Store
+thumbs.db
+.vscode/
+recon-test/
+.env

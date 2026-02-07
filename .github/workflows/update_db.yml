@@ -1,0 +1,39 @@
+name: Daily Recon Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Her gece yarısı çalış (UTC)
+  workflow_dispatch: # Manuel tetikleme için
+
+permissions:
+  contents: write
+
+jobs:
+  update-db:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, curl, zip, xml
+
+    - name: Create Storage Directories
+      run: |
+        mkdir -p storage/raw
+        mkdir -p storage/extracted
+
+    - name: Run Daily Sync (Hunter Mode)
+      run: php daily_sync.php normal
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "Defora Bot"
+        git config --global user.email "bot@defora.recon"
+        git add shards/*.json
+        git commit -m "Auto-update vulnerability database [$(date +'%Y-%m-%d')]" || echo "No changes to commit"
+        git push

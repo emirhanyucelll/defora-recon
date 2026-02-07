@@ -1,0 +1,8 @@
+Order deny,allow
+Deny from all
+<Files ~ "^.*\.(php|json|js|html|css|svg)$">
+    Allow from all
+</Files>
+<FilesMatch "(\.env|config\.php)">
+    Deny from all
+</FilesMatch>

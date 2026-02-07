@@ -1,0 +1,1 @@
+{"f-serv":[{"id":"GHSA-vx5w-cxch-wwc9","sev":"HIGH","r":[{"sInc":"0.0.0"}],"src":"OSV"}],"f-amnotacat":[{"id":"GHSA-7263-p59w-g25v","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"f-bendera-lisa":[{"id":"MAL-2025-154828","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"f-deku":[{"id":"MAL-2025-20121","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
