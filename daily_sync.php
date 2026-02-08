@@ -125,8 +125,9 @@ if (!empty($content)) {
                 }
             }
 
-            // Hunter Mode (CPE Yoksa)
+            // YÖNTEM B: Smart Text Mining (CPE Yoksa Devreye Girer)
             if (!$hasCPE && !empty($desc)) {
+                // 1. Watchlist Taraması
                 foreach ($watchlist as $tech) {
                     if (stripos($desc, $tech) !== false) {
                         $rule = ['exact' => '*'];
@@ -134,6 +135,23 @@ if (!empty($content)) {
                             $rule = ['eExc' => $m[1]];
                         }
                         $batch[$tech][] = ['id' => $cve_id, 'sev' => 'HIGH', 'r' => [$rule], 'src' => 'NVD-MINER'];
+                        $hasCPE = true;
+                    }
+                }
+
+                // 2. DİNAMİK KEŞİF (Watchlist'te yoksa bile yakala)
+                if (!$hasCPE) {
+                    // Kalıp: "... in [Ürün Adı] versions before ..."
+                    if (preg_match('/(?:in|for)\s+([A-Z][a-zA-Z0-9._-]+)\s+(?:versions?|before|prior)/i', $desc, $m)) {
+                        $discoveredTech = strtolower($m[1]);
+                        if (strlen($discoveredTech) > 2 && !in_array($discoveredTech, ['the', 'this', 'that'])) {
+                            $rule = ['exact' => '*'];
+                            if (preg_match('/(?:before|prior to|up to)\s+([0-9.]+)/i', $desc, $v)) {
+                                $rule = ['eExc' => $v[1]];
+                            }
+                            $batch[$discoveredTech][] = ['id' => $cve_id, 'sev' => 'HIGH', 'r' => [$rule], 'src' => 'NVD-DISCOVERY'];
+                            echo "    [*] KEŞİF: $discoveredTech ({$cve_id}) bulundu!\n";
+                        }
                     }
                 }
             }
