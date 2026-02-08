@@ -1,5 +1,8 @@
 (function() {
-    // GHOST PROBE V5: ENCYCLOPEDIA (100+ Static Signatures)
+    // GHOST PROBE V6: OMNISCIENT & FILTERED
+    const detected = [];
+    const seen = new Set();
+
     const libraryMap = {
         "React": () => window.React?.version,
         "Vue": () => window.Vue?.version,
@@ -32,8 +35,6 @@
         "Materialize": () => window.Materialize?.version,
         "UIkit": () => window.UIkit?.version,
         "Zepto": () => window.Zepto?.fn?.zepto,
-        "Tailwind": () => document.querySelector('[class*="tw-"], [class*="space-x-"]') ? 'Detected' : null,
-        "Bulma": () => document.querySelector('.is-flex, .columns.is-mobile') ? 'Detected' : null,
         "Shopify": () => window.Shopify ? 'Detected' : null,
         "WordPress": () => window.wp ? 'Detected' : null,
         "Drupal": () => window.Drupal ? 'Detected' : null,
@@ -41,12 +42,45 @@
         "Magento": () => window.Mage ? 'Detected' : null
     };
 
-    const detected = [];
+    // 1. Bilinen Kütüphaneler
     for (let [name, check] of Object.entries(libraryMap)) {
         try {
             const v = check();
-            if (v) detected.push({ name, version: String(v), source: "Memory" });
+            if (v) {
+                detected.push({ name, version: String(v), source: "Memory" });
+                seen.add(name.toLowerCase());
+            }
         } catch(e) {}
     }
+
+    // 2. Dinamik Universal Scanner (Gürültü Filtreli)
+    const versionKeys = ['version', 'VERSION', 'v', 'ver', 'release'];
+    const blacklist = ['window', 'document', 'location', 'navigator', 'history', 'screen', 'performance', 'console', 'chrome', 'external', 'parent', 'top', 'self', 'frames', 'styleMedia', 'localStorage', 'sessionStorage', 'indexedDB', 'webkitStorageInfo', 'crypto', 'visualViewport', 'speechSynthesis', 'toolbar', 'statusbar', 'menubar', 'personalbar', 'scrollbars', 'name', 'status', 'length', 'closed', 'opener', 'frameElement', 'customElements', 'clientInformation', 'event', 'offscreenBuffering', 'defaultStatus', 'defaultstatus', 'devicePixelRatio', 'screenLeft', 'screenTop', 'outerHeight', 'outerWidth', 'innerheight', 'innerWidth', 'screenX', 'screenY', 'pageXOffset', 'pageYOffset', 'scrollX', 'scrollY', 'caches', 'cookieStore', 'ondevicemotion', 'ondeviceorientation', 'ondeviceorientationabsolute', 'credentialless', 'trustedTypes', 'scheduler', 'cookieStore'];
+
+    for (const key of Object.getOwnPropertyNames(window)) {
+        if (blacklist.includes(key) || key.startsWith('on') || key.startsWith('webkit') || !isNaN(parseInt(key))) continue;
+        if (seen.has(key.toLowerCase())) continue;
+
+        try {
+            const obj = window[key];
+            if (obj && typeof obj === 'object' && obj !== null) {
+                for (const vKey of versionKeys) {
+                    if (vKey in obj) {
+                        const val = obj[vKey];
+                        if (val && (typeof val === 'string' || typeof val === 'number')) {
+                            const verStr = String(val);
+                            // Sıkı Filtre: 15 karakterden kısa olmalı, sayı içermeli, karmaşık semboller (+, /, =) içermemeli
+                            if (verStr.length < 15 && verStr.match(/\d/) && !verStr.match(/[+\/=]/)) {
+                                detected.push({ name: key, version: verStr, source: "Memory" });
+                                seen.add(key.toLowerCase());
+                                break; 
+                            }
+                        }
+                    }
+                }
+            }
+        } catch(e) {}
+    }
+
     document.documentElement.setAttribute('defora-recon-data', JSON.stringify(detected));
 })();
