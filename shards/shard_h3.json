@@ -1,1 +1,1 @@
-{"h3":[{"id":"CVE-2026-23527","sev":"HIGH","r":[{"sInc":"0","eExc":"1.15.5"}],"src":"OSV"}],"h3-jsv3":[{"id":"GHSA-vmrc-qwff-38c3","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"h3-website":[{"id":"GHSA-hjx3-4682-67fw","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"h3":[{"id":"GHSA-mp2g-9vg9-f4cg","sev":"HIGH","r":[{"sInc":"0","eExc":"1.15.5"}],"src":"OSV"}],"h3-jsv3":[{"id":"MAL-2022-3542","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"h3-website":[{"id":"MAL-2022-3543","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

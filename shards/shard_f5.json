@@ -1,1 +1,1 @@
-{"f5-logger":[{"id":"GHSA-3m52-hg89-8v6q","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"f5fg":[{"id":"MAL-2025-20125","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"f5-logger":[{"id":"MAL-2022-2957","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"},{"id":"MAL-2025-192608","sev":"HIGH","r":[],"src":"OSV"}],"f5fg":[{"id":"MAL-2025-20125","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"f5rest":[{"id":"MAL-2025-192609","sev":"HIGH","r":[],"src":"OSV"}]}

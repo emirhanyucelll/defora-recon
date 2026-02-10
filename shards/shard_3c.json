@@ -1,1 +1,1 @@
-{"3commas-api-client":[{"id":"GHSA-gpj4-4j4w-rjc4","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"3cx-call-control-apps":[{"id":"GHSA-qqrv-3q72-x326","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"3commas-api-client":[{"id":"MAL-2023-18","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"3cx-call-control-apps":[{"id":"MAL-2025-148","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

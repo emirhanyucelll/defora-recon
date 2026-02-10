@@ -1,1 +1,1 @@
-{"c42-auth":[{"id":"GHSA-x38v-r72h-f7j3","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"c42-helpers":[{"id":"GHSA-xw3m-qmwf-ff3r","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"c42-ui":[{"id":"GHSA-h839-4m46-c8f4","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"c42-auth":[{"id":"MAL-2022-1751","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"c42-helpers":[{"id":"MAL-2022-1752","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"c42-ui":[{"id":"MAL-2022-1753","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

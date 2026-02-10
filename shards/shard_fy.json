@@ -1,1 +1,1 @@
-{"fyre-utils":[{"id":"GHSA-5mg8-pxhj-cm72","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"fyrox-core":[{"id":"RUSTSEC-2024-0435","sev":"HIGH","r":[{"sInc":"0.28.1","eExc":"0.36"}],"src":"OSV"},{"id":"GHSA-h7h7-6mx3-r89v","sev":"HIGH","r":[{"sInc":"0.0.0-0","eExc":"0.36.0"}],"src":"OSV"}]}
+{"fyre-utils":[{"id":"MAL-2025-4830","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"fyinance":[{"id":"MAL-2023-1853","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

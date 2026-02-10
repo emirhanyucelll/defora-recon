@@ -1,1 +1,1 @@
-{"360class.jansenhm":[{"id":"CVE-2017-16186","sev":"HIGH","r":[{"sInc":"0.0.0"}],"src":"OSV"}],"360-products":[{"id":"MAL-2025-7003","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"360class.jansenhm":[{"id":"GHSA-25jw-gcfj-283j","sev":"HIGH","r":[{"sInc":"0.0.0"}],"src":"OSV"}],"360-products":[{"id":"MAL-2025-7003","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

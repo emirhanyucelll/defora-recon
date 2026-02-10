@@ -1,1 +1,1 @@
-{"y18n":[{"id":"CVE-2020-7774","sev":"HIGH","r":[{"sInc":"0","eExc":"3.2.2"}],"src":"OSV"},{"id":"CVE-2020-7774","sev":"HIGH","r":[{"sInc":"4.0.0","eExc":"4.0.1"}],"src":"OSV"},{"id":"CVE-2020-7774","sev":"HIGH","r":[{"sInc":"5.0.0","eExc":"5.0.5"}],"src":"OSV"}]}
+{"y18n":[{"id":"GHSA-c4w7-xm78-47vh","sev":"HIGH","r":[{"sInc":"0","eExc":"3.2.2"}],"src":"OSV"}],"y12138":[{"id":"MAL-2025-2918","sev":"HIGH","r":[],"src":"OSV"}]}

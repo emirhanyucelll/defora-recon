@@ -1,1 +1,1 @@
-{"s1assets":[{"id":"GHSA-qr2c-hqg9-qpgc","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"s1variables":[{"id":"GHSA-3xmg-x3m4-mr63","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"s1e7ok":[{"id":"MAL-2025-32593","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"s1assets":[{"id":"MAL-2022-5895","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"s1variables":[{"id":"MAL-2022-5896","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"s1e7ok":[{"id":"MAL-2025-32593","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

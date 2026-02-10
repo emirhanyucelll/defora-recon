@@ -1,1 +1,1 @@
-{"d-sscale":[{"id":"GHSA-rpvh-6gqp-vchg","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"d-zyx":[{"id":"MAL-2025-17909","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"d-sscale":[{"id":"MAL-2022-2305","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"d-zyx":[{"id":"MAL-2025-17909","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"d-aliased1":[{"id":"MAL-2025-47652","sev":"HIGH","r":[],"src":"OSV"}],"d-aliased2":[{"id":"MAL-2025-47653","sev":"HIGH","r":[],"src":"OSV"}]}

@@ -1,1 +1,1 @@
-{"uhclabs_local_check":[{"id":"GHSA-6q4m-87vg-298c","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"uhqsniper":[{"id":"GHSA-xfqm-92mj-r2j2","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"uherbst":[{"id":"MAL-2025-37589","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"uhclabs_local_check":[{"id":"MAL-2022-6745","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"uhqsniper":[{"id":"MAL-2024-128","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"uherbst":[{"id":"MAL-2025-37589","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

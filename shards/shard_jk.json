@@ -1,1 +1,1 @@
-{"jkhgint":[{"id":"GHSA-9j57-p37r-6vc9","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"jkgithub":[{"id":"MAL-2025-23816","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"jkhgint":[{"id":"MAL-2022-4037","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"jkgithub":[{"id":"MAL-2025-23816","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"jksandbox":[{"id":"MAL-2024-5280","sev":"HIGH","r":[],"src":"OSV"}]}

@@ -1,1 +1,1 @@
-{"7715-permissions-shared":[{"id":"GHSA-cr3j-vwfg-rcv8","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"7702-eoa-implementation":[{"id":"MAL-2025-6683","sev":"HIGH","r":[{"sInc":"1.0.3"}],"src":"OSV"}],"77z8zt":[{"id":"MAL-2025-7026","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"7715-permissions-shared":[{"id":"MAL-2025-191493","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"7702-eoa-implementation":[{"id":"MAL-2025-6683","sev":"HIGH","r":[{"sInc":"1.0.3"}],"src":"OSV"}],"77z8zt":[{"id":"MAL-2025-7026","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

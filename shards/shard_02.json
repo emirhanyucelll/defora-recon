@@ -1,1 +1,1 @@
-{"029testnpm":[{"id":"GHSA-r8qm-c82c-c9r7","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"029testnpm":[{"id":"MAL-2025-1","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"02-echo":[{"id":"MAL-2025-191025","sev":"HIGH","r":[],"src":"OSV"}]}

@@ -1,1 +1,1 @@
-{"3exprem":[{"id":"GHSA-xqqc-ppcf-gm6m","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"3electron":[{"id":"MAL-2025-7005","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"3exprem":[{"id":"MAL-2022-28","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"3electron":[{"id":"MAL-2025-7005","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

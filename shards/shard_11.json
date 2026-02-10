@@ -1,1 +1,1 @@
-{"11xiaoli":[{"id":"CVE-2017-16160","sev":"HIGH","r":[{"sInc":"0.0.0"}],"src":"OSV"}],"11ty-simple-page-post-creator":[{"id":"MAL-2025-6978","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"11xiaoli":[{"id":"GHSA-x2jj-x3q2-7hph","sev":"HIGH","r":[{"sInc":"0.0.0"}],"src":"OSV"}],"11ty-simple-page-post-creator":[{"id":"MAL-2025-6978","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}

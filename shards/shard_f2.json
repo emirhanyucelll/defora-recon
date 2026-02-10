@@ -1,1 +1,1 @@
-{"f2e-server":[{"id":"CVE-2017-16038","sev":"HIGH","r":[{"sInc":"0","eExc":"1.12.12"}],"src":"OSV"}]}
+{"f2e-server":[{"id":"GHSA-g7j3-p357-cw8p","sev":"HIGH","r":[{"sInc":"0","eExc":"1.12.12"}],"src":"OSV"}],"f2d5cfdc642c3d4":[{"id":"MAL-2025-3446","sev":"HIGH","r":[],"src":"OSV"}],"f2d5cfdc642c3d5":[{"id":"MAL-2025-3447","sev":"HIGH","r":[],"src":"OSV"}]}

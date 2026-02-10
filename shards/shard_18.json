@@ -1,1 +1,1 @@
-{"18f-dashboard":[{"id":"GHSA-7xxj-v663-32v4","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"182-23run":[{"id":"MAL-2025-5831","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"18mr4e":[{"id":"MAL-2025-6985","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"18f-dashboard":[{"id":"MAL-2022-19","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"182-23run":[{"id":"MAL-2025-5831","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"18mr4e":[{"id":"MAL-2025-6985","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"18923aa":[{"id":"MAL-2024-4721","sev":"HIGH","r":[],"src":"OSV"}]}

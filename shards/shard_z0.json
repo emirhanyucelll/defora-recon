@@ -1,1 +1,1 @@
-{"z0ra-helper":[{"id":"GHSA-84pg-h284-4xrv","sev":"HIGH","r":[{"sInc":"1.0.0"},{"sInc":"0"}],"src":"OSV"}]}
+{"z0ra-helper":[{"id":"MAL-2025-4963","sev":"HIGH","r":[{"sInc":"1.0.0"},{"sInc":"0"}],"src":"OSV"}],"z0rsdumbtestnonshould":[{"id":"MAL-2025-6670","sev":"HIGH","r":[],"src":"OSV"}]}
