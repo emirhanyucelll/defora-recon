@@ -34,7 +34,7 @@ jobs:
         chmod -R 777 storage shards
 
     - name: Execute Surgical Sync
-      run: php -d memory_limit=-1 daily_sync.php normal
+      run: php -d memory_limit=-1 -d display_errors=1 -d error_reporting=E_ALL daily_sync.php normal
 
     - name: Cleanup Temporary Files
       run: rm -rf storage/raw/*
