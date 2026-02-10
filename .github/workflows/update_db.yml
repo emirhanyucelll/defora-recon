@@ -1,7 +1,7 @@
 name: Daily Recon Update (External Trigger)
 
 on:
-  workflow_dispatch: # Sadece dışarıdan tetiklenebilir
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,13 +14,18 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
+      with:
+        persist-credentials: true # Push yetkisi için kritik
 
     - name: Setup PHP Environment
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.1'
         extensions: mbstring, curl, zip, xml, json
-        ini-values: memory_limit=-1, max_execution_time=0
+        ini-values: memory_limit=-1, max_execution_time=0, display_errors=1
+
+    - name: Debug Workspace
+      run: ls -la
 
     - name: Prepare Workspace
       run: |
@@ -35,9 +40,16 @@ jobs:
       run: rm -rf storage/raw/*
 
     - name: Commit and Push Database Update
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name "DeforaBot"
         git config --global user.email "bot@defora.recon"
         git add shards/*.json last_sync.txt
-        git commit -m "Auto-sync vulnerability database [$(date +'%Y-%m-%d %H:%M')]" || echo "Veri degisikligi yok."
-        git push
+        # Boş commit hatasını engelle
+        if git diff-index --quiet HEAD; then
+          echo "Değişiklik yok, commit atlanıyor."
+        else
+          git commit -m "Auto-sync vulnerability database [$(date +'%Y-%m-%d %H:%M')]"
+          git push origin main
+        fi
