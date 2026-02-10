@@ -1,9 +1,7 @@
-name: Daily Recon Update
+name: Daily Recon Update (External Trigger)
 
 on:
-  schedule:
-    - cron: '0 0 * * *' # Her gece yarısı çalış (UTC)
-  workflow_dispatch: # Manuel tetikleme için
+  workflow_dispatch: # Sadece dışarıdan tetiklenebilir
 
 permissions:
   contents: write
@@ -11,29 +9,35 @@ permissions:
 jobs:
   update-db:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-    - name: Checkout code
+    - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Setup PHP
+    - name: Setup PHP Environment
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.1'
-        extensions: mbstring, curl, zip, xml
+        extensions: mbstring, curl, zip, xml, json
+        ini-values: memory_limit=-1, max_execution_time=0
 
-    - name: Create Storage Directories
+    - name: Prepare Workspace
       run: |
         mkdir -p storage/raw
-        mkdir -p storage/extracted
+        mkdir -p shards
+        chmod -R 777 storage shards
 
-    - name: Run Daily Sync (Hunter Mode)
-      run: php daily_sync.php normal
+    - name: Execute Surgical Sync
+      run: php -d memory_limit=-1 daily_sync.php normal
 
-    - name: Commit and Push Changes
+    - name: Cleanup Temporary Files
+      run: rm -rf storage/raw/*
+
+    - name: Commit and Push Database Update
       run: |
-        git config --global user.name "Defora Bot"
+        git config --global user.name "DeforaBot"
         git config --global user.email "bot@defora.recon"
-        git add shards/*.json
-        git commit -m "Auto-update vulnerability database [$(date +'%Y-%m-%d')]" || echo "No changes to commit"
+        git add shards/*.json last_sync.txt
+        git commit -m "Auto-sync vulnerability database [$(date +'%Y-%m-%d %H:%M')]" || echo "Veri degisikligi yok."
         git push
