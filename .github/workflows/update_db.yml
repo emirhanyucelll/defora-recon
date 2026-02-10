@@ -45,7 +45,8 @@ jobs:
       run: |
         git config --global user.name "DeforaBot"
         git config --global user.email "bot@defora.recon"
-        git add shards/*.json last_sync.txt
+        # Force add kullanarak ignore kurallarını aş
+        git add -f shards/*.json last_sync.txt
         # Boş commit hatasını engelle
         if git diff-index --quiet HEAD; then
           echo "Değişiklik yok, commit atlanıyor."
