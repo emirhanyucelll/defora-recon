@@ -1,16 +1,9 @@
-// DEFORA RECON - THE BRAIN (V85 - BEAST MODE)
+// DEFORA RECON - THE BRAIN (V90 - REBORN & STABLE)
 const BASE_URL = "https://emirhanyucelll.github.io/defora-recon/shards/";
-const SHARD_CACHE = new Map();
-const MASTER_DATA = new Map(); // RAM Üzerinde Ölümsüz Veri
-let CRAWLER = { active: false, queue: [], visited: new Set(), secrets: [], domain: "" };
-
-const techAliases = {
-    'angular': ['angularjs', 'angular.js'], 'react': ['reactjs'], 'vue.js': ['vue', 'vuejs'],
-    'jquery': ['jquery.js'], 'bootstrap': ['bootstrap_framework']
-};
+let SHARD_CACHE = {};
 
 const patterns = {
-    "Cloud: AWS Key": /AKIA[0-9A-Z]{16}/g,
+    "Cloud: AWS": /AKIA[0-9A-Z]{16}/g,
     "Cloud: Google": /AIza[0-9A-Za-z\-_]{20,50}/g,
     "Token: GitHub": /ghp_[a-zA-Z0-9]{30,50}/g,
     "Token: Twilio SID": /\bAC[0-9a-fA-F]{32}\b/g,
@@ -18,15 +11,12 @@ const patterns = {
     "Bağlantı: DB Link": /(?:postgres(?:ql)?|mongodb(?:\+srv)?|mysql|redis):\/\/[a-z0-9._-]+\:[a-z0-9._-]+\@[a-z0-9.-]+/gi
 };
 
-// --- HIZLI ANALIZ MOTORU ---
+// --- YARDIMCI FONKSİYONLAR ---
 async function getShard(name) {
     let p = name.substring(0, 2).toLowerCase(); if (p.length < 2) p += '_';
     p = p.replace(/[^a-z0-9]/g, '_');
-    if (SHARD_CACHE.has(p)) return SHARD_CACHE.get(p);
-    try { 
-        const res = await fetch(`${BASE_URL}shard_${p}.json`);
-        if (res.ok) { const j = await res.json(); SHARD_CACHE.set(p, j); return j; }
-    } catch (e) {}
+    if (SHARD_CACHE[p]) return SHARD_CACHE[p];
+    try { const res = await fetch(`${BASE_URL}shard_${p}.json`); if (res.ok) { SHARD_CACHE[p] = await res.json(); return SHARD_CACHE[p]; } } catch (e) {}
     return null;
 }
 
@@ -48,135 +38,74 @@ function isVulnerable(v, rules) {
     } return false;
 }
 
-// --- TRUE BACKGROUND SPIDER ---
+// --- FULL SCAN ---
+let spider = { active: false, queue: [], visited: new Set(), secrets: [], domain: "", tabId: null };
+
 async function startFullScan(tabId, url) {
     const u = new URL(url);
-    CRAWLER = { 
-        active: true, 
-        tabId: tabId, 
-        domain: u.hostname, 
-        baseDomain: u.hostname.split('.').slice(-2).join('.'), 
-        queue: [url], 
-        visited: new Set(), 
-        secrets: [] 
-    };
+    spider = { active: true, tabId, domain: u.hostname, queue: [url], visited: new Set(), secrets: [] };
     chrome.storage.local.set({ fullScanActive: true, scanProgress: 0 });
-    console.log("Full Scan Baslatildi: " + url);
-    runSpider(); // Motoru calistir
+    runSpider();
 }
 
 async function runSpider() {
-    if(!CRAWLER.active || CRAWLER.queue.length === 0 || CRAWLER.visited.size >= 40) return finishScan();
-    
-    const target = CRAWLER.queue.shift();
-    if(!target || CRAWLER.visited.has(target)) return runSpider();
-    
-    CRAWLER.visited.add(target);
-    console.log("Taraniyor: " + target);
-    
-    // Progress Update
-    const prog = Math.round((CRAWLER.visited.size / 40) * 100);
-    chrome.storage.local.set({ scanProgress: prog });
+    if(!spider.active || spider.queue.length === 0 || spider.visited.size >= 30) {
+        finishSpider(); return;
+    }
+    const current = spider.queue.shift();
+    if(spider.visited.has(current)) return runSpider();
+    spider.visited.add(current);
+    chrome.storage.local.set({ scanProgress: Math.round((spider.visited.size / 30) * 100) });
 
     try {
-        const resp = await fetch(target, { cache: 'no-store' });
-        if (resp.ok) {
-            const html = await resp.text();
-            // 1. Sızıntı Analizi
-            for(let [type, reg] of Object.entries(patterns)) {
-                const matches = html.matchAll(reg);
-                for(const m of matches) {
-                    CRAWLER.secrets.push({ type, value: m[0], url: target });
-                }
-            }
-            // 2. Link Toplama
-            const links = html.match(/href=["'](\/[^"'>\s]+|https?:\/\/[^"'>\s]+)["']/gi);
-            if(links) {
-                links.forEach(m => {
-                    let l = m.match(/["']([^"']+)["']/)[1];
-                    if(l.startsWith('/')) l = new URL(target).origin + l;
-                    if(l.includes(CRAWLER.baseDomain) && !CRAWLER.visited.has(l) && !CRAWLER.queue.includes(l)) {
-                        CRAWLER.queue.push(l);
-                    }
-                });
-            }
+        const resp = await fetch(current);
+        const html = await resp.text();
+        // Sızıntıları Ayıkla
+        for(let [type, reg] of Object.entries(patterns)) {
+            const matches = html.matchAll(reg);
+            for(const m of matches) spider.secrets.push({ type, value: m[0], url: current });
         }
-    } catch(e) { console.error("Fetch hatasi:", e); }
-    
-    setTimeout(runSpider, 1000); // 1 saniye bekle ve devam et
+        // Linkleri Topla
+        const links = html.match(/href=["'](\/[^"'>\s]+|https?:\/\/[^"'>\s]+)["']/gi);
+        if(links) links.forEach(m => {
+            let l = m.match(/["']([^"']+)["']/)[1];
+            if(l.startsWith('/')) l = new URL(current).origin + l;
+            if(l.includes(spider.domain) && !spider.visited.has(l)) spider.queue.push(l);
+        });
+    } catch(e) {}
+    setTimeout(runSpider, 800);
 }
 
-function finishScan() {
-    CRAWLER.active = false;
-    chrome.storage.local.set({ fullScanActive: false, scanProgress: 100 });
-    const unique = Array.from(new Set(CRAWLER.secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
+function finishSpider() {
+    spider.active = false;
+    chrome.storage.local.set({ fullScanActive: false });
+    const unique = Array.from(new Set(spider.secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
     
-    const reportHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Audit</title><style>body{font-family:sans-serif;background:#fff;padding:50px;color:#111}.card{background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #eee;margin-bottom:15px}code{background:#000;color:#0f0;padding:10px;display:block;border-radius:6px;word-break:break-all}</style></head><body><h1>Defora Recon Audit</h1><p>Target: ${CRAWLER.domain}</p><h2>Data Leaks</h2>${unique.map(s=>`<div class="card"><b>${s.type}</b><code>${s.value}</code><small>📍 ${new URL(s.url).pathname}</small></div>`).join('')}</body></html>`;
+    const reportHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Audit</title><style>body{font-family:sans-serif;background:#fff;padding:50px;} .card{background:#f8fafc;padding:15px;border-radius:10px;border:1px solid #eee;margin-bottom:10px;} code{background:#000;color:#0f0;padding:8px;display:block;border-radius:6px;word-break:break-all;}</style></head>
+    <body><h1>Defora Audit: ${spider.domain}</h1>${unique.map(s=>`<div class="card"><b>${s.type}</b><code>${s.value}</code><small>Yol: ${new URL(s.url).pathname}</small></div>`).join('')}</body></html>`;
     
     const blob = "data:text/html;base64," + btoa(unescape(encodeURIComponent(reportHTML)));
-    chrome.downloads.download({ url: blob, filename: `RECON_${CRAWLER.domain.replace(/\./g, '_')}.html` });
+    chrome.downloads.download({ url: blob, filename: `RECON_${spider.domain.replace(/\./g, '_')}.html` });
 }
 
-// --- MESSAGE ENGINE ---
-chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
-    if(req.action === "START_FULL_SCAN") startFullScan(sender.tab.id, req.url);
-    if(req.action === "GET_LIVE_DATA") { sendResponse(MASTER_DATA.get(req.tabId) || null); return true; }
-    if(req.action === "SCAN_RESULTS") {
+// --- MESSAGE LISTENERS ---
+chrome.runtime.onMessage.addListener(async (req, sender) => {
+    if (req.action === "START_FULL_SCAN") startFullScan(sender.tab.id, req.url);
+    if (req.action === "SCAN_RESULTS") {
         const tabId = sender.tab.id;
         let { secrets, tech, endpoints } = req.data;
         
-        // --- VERİ MÜHÜRLEME (YÜZEY/ENDPOINTS) ---
-        if (!MASTER_DATA.has(tabId)) {
-            MASTER_DATA.set(tabId, { secrets: [], tech: [], matches: [], endpoints: new Set(), security: [] });
+        const matches = []; const seen = new Set();
+        for(const t of (tech || [])) {
+            const clean = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '').trim();
+            if(!clean || seen.has(clean)) continue; seen.add(clean);
+            const shard = await getShard(clean);
+            if(shard && shard[clean]) {
+                const f = shard[clean].filter(i => isVulnerable(t.version, i.r));
+                if(f.length) matches.push({ tech: clean.toUpperCase(), version: t.version, exploits: f });
+            }
         }
-        
-        const currentTab = MASTER_DATA.get(tabId);
-        
-        // Yeni endpointleri eskilerin üzerine ekle (Kaybetme!)
-        if (endpoints && Array.isArray(endpoints)) {
-            endpoints.forEach(e => currentTab.endpoints.add(e));
-        }
-
-        (async () => {
-            const matches = []; const seen = new Set();
-            const scanTask = (tech || []).map(async t => {
-                const clean = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '').trim();
-                if(!clean || seen.has(clean)) return; seen.add(clean);
-                const aliases = [clean, ...(techAliases[clean]||[])];
-                for(const a of aliases) {
-                    const shard = await getShard(a);
-                    if(shard && shard[a]) {
-                        const f = shard[a].filter(i => isVulnerable(t.version, i.r));
-                        if(f.length) matches.push({ tech: clean.toUpperCase(), version: t.version, exploits: f });
-                    }
-                }
-            });
-            await Promise.all(scanTask);
-            
-            // Verileri Güncelle
-            currentTab.secrets = secrets || [];
-            currentTab.tech = tech || [];
-            currentTab.matches = matches;
-            currentTab.time = Date.now();
-
-            const finalForPopup = { 
-                ...currentTab, 
-                endpoints: Array.from(currentTab.endpoints) // Set'i diziye cevir
-            };
-
-            MASTER_DATA.set(tabId, currentTab);
-            chrome.storage.local.set({ [`results_${tabId}`]: finalForPopup });
-            chrome.runtime.sendMessage({ action: "UPDATE_UI", data: finalForPopup });
-        })();
+        chrome.storage.local.set({ [`results_${tabId}`]: { secrets, tech, matches, endpoints, time: Date.now() } });
+        chrome.runtime.sendMessage({ action: "UPDATE_UI" });
     }
 });
-
-// --- LIVE NETWORK SENSOR ---
-chrome.webRequest.onHeadersReceived.addListener((d) => {
-    if(d.type !== 'main_frame') return;
-    const security = []; const h = d.responseHeaders.map(x => x.name.toLowerCase());
-    if(!h.includes('strict-transport-security')) security.push({ name: 'HSTS Eksik', risk: 'MEDIUM', desc: 'Güvenli bağlantı zorunlu değil.' });
-    if(!h.includes('x-frame-options')) security.push({ name: 'Clickjacking', risk: 'HIGH', desc: 'Site bir frame içine gömülebilir.' });
-    if(!MASTER_DATA.has(d.tabId)) MASTER_DATA.set(d.tabId, { security: [] });
-    MASTER_DATA.get(d.tabId).security = security;
-}, { urls: ["<all_urls>"] }, ["responseHeaders"]);
