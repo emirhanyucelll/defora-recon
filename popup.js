@@ -1,4 +1,4 @@
-// DEFORA RECON - HUD CONTROL (V81 - STABLE & FAST)
+// DEFORA RECON - HUD CONTROL (V85 - LIGHTNING)
 document.addEventListener('DOMContentLoaded', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab) return;
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const exportBtn = document.getElementById('exportReport');
     const progressCount = document.getElementById('progressCount');
 
-    // CANLI VERI AL (Background'dan doğrudan)
+    // CANLI VERIYE BAGLAN
     function sync() {
         chrome.runtime.sendMessage({ action: "GET_LIVE_DATA", tabId: tab.id }, (data) => {
             if (data) render(data);
@@ -15,11 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     sync();
 
-    // CANLI GÜNCELLEME DINLE
     chrome.runtime.onMessage.addListener((msg) => {
-        if (msg.action === "UPDATE_UI" || msg.action === "FULL_SCAN_COMPLETE") {
-            sync();
-        }
+        if (msg.action === "UPDATE_UI" || msg.action === "FULL_SCAN_COMPLETE") render(msg.data);
     });
 
     function render(data) {
@@ -27,16 +24,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             // Inventory
             const inv = document.getElementById('inventoryList');
-            if(inv) inv.innerHTML = (data.tech || []).map(t => `<div class="item-card"><div style="display:flex; justify-content:space-between;"><span>${t.name}</span><span class="tech-version-pill">${t.version || '...'}</span></div></div>`).join('') || '<div class="empty-state">Yok.</div>';
+            if(inv) inv.innerHTML = (data.tech || []).map(t => `<div class="item-card"><div style="display:flex; justify-content:space-between;"><span>${t.name}</span><span class="tech-version-pill">${t.version || '...'}</span></div></div>`).join('');
             
+            // Security
+            const sec = document.getElementById('securityList');
+            if(sec) {
+                const sData = data.security || [];
+                let score = 100;
+                sec.innerHTML = sData.length ? sData.map(s => {
+                    score -= (s.risk === 'HIGH' ? 20 : 10);
+                    return `<div class="item-card" style="border-left:3px solid ${s.risk === 'HIGH' ? 'var(--danger)' : 'var(--warning)'}"><strong>${s.name}</strong><br><small>${s.desc}</small></div>`;
+                }).join('') : '<div class="empty-state">Analiz ediliyor...</div>';
+                document.getElementById('securityScore').innerText = score + "/100";
+            }
+
             // Secrets
             const sl = document.getElementById('secretList');
-            if(sl) sl.innerHTML = (data.secrets || []).map(s => `<div class="item-card secret-card" style="border-left:3px solid var(--danger)"><span class="secret-label">${s.type}</span><div class="secret-content">${s.value}</div></div>`).join('') || '<div class="empty-state">Temiz.</div>';
+            if(sl) {
+                document.getElementById('secretCount').innerText = (data.secrets || []).length;
+                sl.innerHTML = (data.secrets || []).map(s => `<div class="item-card secret-card" style="border-left:3px solid var(--danger)"><span class="secret-label">${s.type}</span><div class="secret-content">${s.value}</div></div>`).join('') || '<div class="empty-state">Temiz.</div>';
+            }
 
             // Vulns
             const vl = document.getElementById('vulnList');
-            if(vl) vl.innerHTML = (data.matches || []).map(m => `<div class="item-card"><div class="card-top"><span class="tech-title">${m.tech} ${m.version}</span></div><div class="cve-list">${m.exploits.map(ex => `<span class="cve-tag">${ex.id}</span>`).join(' ')}</div></div>`).join('') || '<div class="empty-state">Yok.</div>';
-        } catch (e) { console.error(e); }
+            if(vl) vl.innerHTML = (data.matches || []).map(m => `<div class="item-card"><div class="card-top"><span class="tech-title">${m.tech} ${m.version}</span></div><div class="cve-list">${m.exploits.map(ex => `<span class="cve-tag">${ex.id}</span>`).join(' ')}</div></div>`).join('') || '<div class="empty-state">Zafiyet yok.</div>';
+        } catch (e) {}
     }
 
     if (fullScanBtn) {
