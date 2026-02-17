@@ -1,1 +1,1 @@
-{"3web":[{"id":"MAL-2024-9933","sev":"HIGH","r":[],"src":"OSV"}],"3web-py":[{"id":"MAL-2024-9934","sev":"HIGH","r":[],"src":"OSV"}]}
+{"3ware_disk_manager":[{"id":"CVE-2013-0705","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

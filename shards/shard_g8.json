@@ -1,1 +1,1 @@
-{"g8untcotribwatch":[{"id":"MAL-2022-3262","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"g810-led":[{"id":"CVE-2022-46338","sev":"HIGH","r":[{"exact":"0.4.2"}],"src":"NVD-MOP"}]}

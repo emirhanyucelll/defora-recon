@@ -1,1 +1,1 @@
-{"vjlruxeiqtanmkoy":[{"id":"MAL-2022-6948","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"vjzual":[{"id":"MAL-2025-38521","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"vjri":[{"id":"MAL-2026-122","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"vjchat":[{"id":"CVE-2009-4971","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}

@@ -1,5 +1,5 @@
 <?php
-// DEFORA RECON - SURGICAL SYNC (Time-Based & API)
+// DEFORA RECON - SMART DAILY SYNC (WEB FOCUSED)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -8,47 +8,27 @@ require_once 'config.php';
 @set_time_limit(0); 
 
 $shards_dir = __DIR__ . DIRECTORY_SEPARATOR . 'shards';
-$raw_dir = __DIR__ . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'raw';
 $timestamp_file = __DIR__ . DIRECTORY_SEPARATOR . 'last_sync.txt';
 
 // Dizin Kontrolü
 if (!file_exists($shards_dir)) { mkdir($shards_dir, 0777, true); }
-if (!file_exists($raw_dir)) { mkdir($raw_dir, 0777, true); }
 
-// Anlık çıktı
+// Anlık çıktı (Browser/CLI)
 if (php_sapi_name() !== 'cli') {
     @ini_set('output_buffering', 'off'); @ini_set('zlib.output_compression', false);
     while (ob_get_level()) ob_end_flush(); ob_implicit_flush(true);
-    echo "<pre style='background:#000; color:#0f0; padding:20px; font-family:monospace;'>";
+    echo "<pre style='background:#111; color:#0f0; padding:20px; font-family:monospace;'>";
 }
 
-echo "DEFORA RECON: GÜNCELLEME OPERASYONU\n";
+echo "DEFORA RECON: AKILLI WEB TARAMASI BAŞLATILIYOR...\n";
 
-// MOD SEÇİMİ
-$mode = isset($argv[1]) ? $argv[1] : (isset($_GET['mode']) ? $_GET['mode'] : 'normal');
-$deep_scan = ($mode === 'deep');
-
-if ($deep_scan) {
-    $last_run = 0;
-    echo "MOD: DEEP SCAN\n";
-} else {
-    $last_run = file_exists($timestamp_file) ? intval(file_get_contents($timestamp_file)) : (time() - 86400);
-    echo "MOD: NORMAL SCAN\n";
-}
-
+// Tarih Ayarları
+$last_run = file_exists($timestamp_file) ? intval(file_get_contents($timestamp_file)) : (time() - 86400);
 $current_run = time();
-echo "Referans Zaman: " . date("Y-m-d H:i:s", $last_run) . "\n";
+echo "Son Senkronizasyon: " . date("Y-m-d H:i:s", $last_run) . "\n";
 echo "--------------------------------------------------\n";
 
-$watchlist = [
-    'bootstrap', 'jquery', 'react', 'vue', 'angular', 'svelte', 'ember', 'meteor',
-    'lodash', 'moment', 'axios', 'socket.io', 'd3', 'chart.js', 'three',
-    'express', 'django', 'flask', 'rails', 'laravel', 'symfony', 'spring',
-    'apache', 'nginx', 'tomcat', 'iis',
-    'mysql', 'postgresql', 'redis', 'mongodb',
-    'wordpress', 'drupal', 'joomla', 'magento', 'shopify',
-    'fastapi', 'hibernate', 'struts', 'log4j', 'jackson'
-];
+// --- YARDIMCI FONKSİYONLAR ---
 
 function updateShards($data, $dir) {
     if (empty($data)) return;
@@ -61,122 +41,192 @@ function updateShards($data, $dir) {
         $current = file_exists($shardPath) ? json_decode(file_get_contents($shardPath), true) : [];
         if ($current === null) $current = [];
 
+        if (!isset($current[$name])) $current[$name] = [];
+
         foreach ($vulns as $newV) {
             $exists = false;
-            if (isset($current[$name])) {
-                foreach ($current[$name] as $idx => $oldV) {
-                    if ($oldV['id'] === $newV['id']) { $current[$name][$idx] = $newV; $exists = true; break; }
-                }
+            foreach ($current[$name] as $idx => $oldV) {
+                if ($oldV['id'] === $newV['id']) { $current[$name][$idx] = $newV; $exists = true; break; }
             }
             if (!$exists) {
                 $current[$name][] = $newV;
-                echo "    [+] Yeni: $name ({$newV['id']})\n";
             }
         }
         file_put_contents($shardPath, json_encode($current));
     }
 }
 
-// 1. NIST MODIFIED
-echo "[*] NIST Modified Kontrol Ediliyor... ";
-$url = "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-modified.json.gz";
-$gz_file = "$raw_dir/nvd-modified.json.gz";
+// Genişletilmiş Web İzleme Listesi (OSV İçin)
+function getWebWatchlist() {
+    return [
+        // Frontend & JS
+        'react', 'vue', 'angular', 'svelte', 'jquery', 'bootstrap', 'next.js', 'nuxt', 'gatsby',
+        'ember-source', 'backbone.js', 'lodash', 'moment', 'axios', 'express', 'socket.io',
+        'chart.js', 'three', 'd3', 'underscore', 'handlebars', 'mustache', 'alpinejs',
+        // PHP Ecosystem
+        'laravel/framework', 'symfony/symfony', 'codeigniter/framework', 'cakephp/cakephp',
+        'slim/slim', 'yiisoft/yii2', 'guzzlehttp/guzzle', 'monolog/monolog', 'phpunit/phpunit',
+        'composer/composer', 'twig/twig', 'doctrine/orm', 'nesbot/carbon',
+        // CMS & E-Commerce
+        'wordpress', 'joomla', 'drupal', 'magento/product-community-edition', 'shopify',
+        'opencart', 'prestashop', 'moodle', 'typo3', 'ghost', 'strapi',
+        // Python Web
+        'django', 'flask', 'fastapi', 'tornado', 'pyramid', 'requests', 'sqlalchemy',
+        // Java Web
+        'spring-framework', 'struts', 'hibernate-orm', 'jackson-databind', 'log4j', 'tomcat', 'jetty',
+        // Server & DB (OSV bazen bunları da paket olarak görür)
+        'nginx', 'apache', 'mysql', 'postgresql', 'redis', 'mongodb'
+    ];
+}
 
-$ch = curl_init($url); $fp = @fopen($gz_file, 'wb');
-if (!$fp) { die("HATA: $gz_file yazilamadi!\n"); }
+// --- 1. NIST API 2.0 (AKILLI WEB FİLTRESİ) ---
+echo "[*] NIST API 2.0 (Sadece Web/App)... ";
 
-curl_setopt($ch, CURLOPT_FILE, $fp); 
+$startDate = date("Y-m-d\TH:i:s.000", $last_run);
+$endDate = date("Y-m-d\TH:i:s.000", $current_run);
+// NVD API Anahtarı Kontrolü (GitHub Secrets veya Config'den al)
+$nvd_api_key = getenv('NVD_API_KEY') ?: (defined('NVD_API_KEY') ? NVD_API_KEY : null);
+
+// API URL (Zaman aralıklı sorgu)
+$nvd_url = "https://services.nvd.nist.gov/rest/json/cves/2.0?lastModStartDate=" . urlencode($startDate) . "&lastModEndDate=" . urlencode($endDate);
+
+$headers = [
+    'User-Agent: DeforaRecon-Sync/2.1',
+    'Accept: application/json'
+];
+
+if ($nvd_api_key) {
+    $headers[] = "apiKey: $nvd_api_key";
+}
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $nvd_url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-curl_setopt($ch, CURLOPT_USERAGENT, 'DeforaRecon/1.0');
-curl_exec($ch); curl_close($ch); fclose($fp);
+curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-if (!file_exists($gz_file) || filesize($gz_file) == 0) {
-    echo "HATA: NIST Dosyasi indirilemedi.\n";
-} else {
-    $content = '';
-    $gz = gzopen($gz_file, 'rb');
-    if ($gz) {
-        while (!gzeof($gz)) { $content .= gzread($gz, 8192); }
-        gzclose($gz);
-    }
+$response = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
 
-    if (!empty($content)) {
-        $data = json_decode($content, true);
-        unset($content);
-        $batch = [];
-        if (isset($data['CVE_Items'])) {
-            foreach ($data['CVE_Items'] as $item) {
-                $modDate = strtotime($item['lastModifiedDate']);
-                if ($modDate < $last_run) continue;
+if ($http_code === 200 && !empty($response)) {
+    $data = json_decode($response, true);
+    $batch = [];
+    $count = 0;
+    
+    // Masaüstü/Donanım Kara Listesi (Regex)
+    $desktop_blacklist = '/(firmware|driver|bios|uefi|kernel|android|ios|windows|macos|linux_desktop|usb|bluetooth|wifi|gpu|nvidia|amd|intel|adobe_acrobat|photoshop|reader|player|client|vpn)/i';
+    
+    if (isset($data['vulnerabilities'])) {
+        foreach ($data['vulnerabilities'] as $item) {
+            $cve = $item['cve'];
+            $cve_id = $cve['id'];
+            if (($cve['vulnStatus'] ?? '') === 'Rejected') continue;
 
-                $cve_id = $item['cve']['CVE_data_meta']['ID'];
-                $desc = $item['cve']['description']['description_data'][0]['value'] ?? '';
-                
-                if (isset($item['configurations']['nodes'])) {
-                    foreach ($item['configurations']['nodes'] as $node) {
-                        foreach ($node['cpe_match'] ?? [] as $m) {
-                            $p = explode(':', $m['cpe23Uri']);
-                            if (isset($p[4])) {
-                                $prod = strtolower($p[4]);
-                                $rule = ['exact' => $p[5] ?? '*'];
-                                if (isset($m['versionStartIncluding'])) $rule['sInc'] = $m['versionStartIncluding'];
-                                if (isset($m['versionEndExcluding']))   $rule['eExc'] = $m['versionEndExcluding'];
-                                $batch[$prod][] = ['id' => $cve_id, 'sev' => 'HIGH', 'r' => [$rule], 'src' => 'NVD'];
-                            }
+            if (isset($cve['configurations'])) {
+                foreach ($cve['configurations'] as $config) {
+                    foreach ($config['nodes'] as $node) {
+                        foreach ($node['cpeMatch'] ?? [] as $match) {
+                            if (!$match['vulnerable']) continue;
+                            
+                            // CPE Analizi: cpe:2.3:PART:VENDOR:PRODUCT:...
+                            $p = explode(':', $match['criteria']);
+                            
+                            // 1. FİLTRE: Sadece Uygulama (a) kategorisi. İşletim Sistemi (o) ve Donanım (h) atılır.
+                            if (!isset($p[2]) || ($p[2] !== 'a')) continue;
+                            
+                            // 2. FİLTRE: Ürün Adı Kontrolü (Web mi?)
+                            $prod = strtolower($p[4] ?? '');
+                            if (empty($prod)) continue;
+
+                            // Eğer ürün adı kara listedeyse at
+                            if (preg_match($desktop_blacklist, $prod)) continue;
+
+                            // Eğer ürün adı web teknolojisi çağrıştırmıyorsa ve çok genel bir isimse şüpheyle yaklaşılabilir
+                            // Ancak şimdilik whitelist yerine blacklist ile gidiyoruz, böylece bilinmeyen yeni web kütüphanelerini kaçırmayız.
+
+                            $rule = ['exact' => $p[5] ?? '*'];
+                            if (isset($match['versionStartIncluding'])) $rule['sInc'] = $match['versionStartIncluding'];
+                            if (isset($match['versionEndExcluding']))   $rule['eExc'] = $match['versionEndExcluding'];
+                            
+                            $batch[$prod][] = ['id' => $cve_id, 'sev' => 'HIGH', 'r' => [$rule], 'src' => 'NVD'];
+                            $count++;
                         }
                     }
                 }
             }
         }
-        updateShards($batch, $shards_dir);
-        echo "TAMAM.\n";
     }
+    updateShards($batch, $shards_dir);
+    echo "TAMAM (Filtre sonrası $count kayıt).\n";
+} else {
+    echo "HATA: NIST Bağlantısı başarısız ($http_code).\n";
 }
 
-// 2. OSV API
-echo "[*] OSV API Taramasi... ";
+// --- 2. OSV API (GENİŞLETİLMİŞ LİSTE) ---
+echo "[*] OSV API (Top 100+ Web Tech)... ";
+$watchlist = getWebWatchlist();
 $batch = [];
+$osv_hits = 0;
+
+// Performans için curl_multi kullanmıyoruz (basitlik adına), ancak timeout kısa tutuyoruz.
 foreach ($watchlist as $tech) {
-    $ecosystems = ['npm', 'PyPI', 'Packagist'];
-    foreach($ecosystems as $eco) {
-        $ch = curl_init("https://api.osv.dev/v1/query");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["package" => ["name" => $tech, "ecosystem" => $eco]]));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        $resp = curl_exec($ch); curl_close($ch);
-        
+    // İsmi temizle (vendor/product -> product)
+    $cleanName = (strpos($tech, '/') !== false) ? explode('/', $tech)[1] : $tech;
+
+    $ch = curl_init("https://api.osv.dev/v1/query");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    // OSV'ye sormak için "ecosystem" belirtmeden isme göre soruyoruz (daha geniş kapsam)
+    // Ancak ecosystem belirtmezsek bazen saçma sonuçlar gelebilir, o yüzden genel deniyoruz.
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["package" => ["name" => $tech]]));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Hızlı geç
+    
+    $resp = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($http_code === 200) {
         $json = json_decode($resp, true);
         if (isset($json['vulns'])) {
             foreach ($json['vulns'] as $v) {
-                if (isset($v['modified']) && strtotime($v['modified']) > $last_run) {
+                $vMod = isset($v['modified']) ? strtotime($v['modified']) : 0;
+                // Sadece son çalıştırmadan sonra güncellenenleri al
+                if ($vMod > $last_run) {
                     $rules = [];
+                    // Affected analizi
                     if (isset($v['affected'])) {
                         foreach ($v['affected'] as $aff) {
-                            foreach ($aff['ranges'] ?? [] as $range) {
-                                if ($range['type'] === "SEMVER") {
+                             $ranges = $aff['ranges'] ?? [];
+                             foreach ($ranges as $range) {
+                                 if (($range['type'] ?? '') === 'SEMVER' || ($range['type'] ?? '') === 'ECOSYSTEM') {
                                     $r = [];
                                     foreach ($range['events'] as $evt) {
                                         if (isset($evt['introduced'])) $r['sInc'] = $evt['introduced'];
                                         if (isset($evt['fixed'])) $r['eExc'] = $evt['fixed'];
                                     }
                                     if(!empty($r)) $rules[] = $r;
-                                }
-                            }
+                                 }
+                             }
                         }
                     }
-                    if(!empty($rules)) $batch[$tech][] = ['id' => $v['id'], 'sev' => 'HIGH', 'r' => $rules, 'src' => "OSV-API"];
+                    if (!empty($rules)) {
+                        $batch[$cleanName][] = ['id' => $v['id'], 'sev' => 'HIGH', 'r' => $rules, 'src' => "OSV"];
+                        $osv_hits++;
+                    }
                 }
             }
         }
     }
 }
 updateShards($batch, $shards_dir);
-echo "TAMAM.\n";
+echo "TAMAM ($osv_hits yeni kayıt).\n";
 
-// Bitis
+// --- BİTİŞ ---
 file_put_contents($timestamp_file, $current_run);
 echo "--------------------------------------------------\n";
-echo "BASARI: SİSTEM SENKRONİZE.\n";
+echo "BASARI: Tüm veritabanları güncellendi.\n";
 if (php_sapi_name() !== 'cli') echo "</pre>";
 ?>

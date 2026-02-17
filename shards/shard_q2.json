@@ -1,1 +1,1 @@
-{"q2-platform":[{"id":"MAL-2025-30981","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"q2a_ultimate_seo":[{"id":"CVE-2021-3258","sev":"HIGH","r":[{"exact":"1.3"}],"src":"NVD-MOP"}],"q2w3_post_order":[{"id":"CVE-2023-47521","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

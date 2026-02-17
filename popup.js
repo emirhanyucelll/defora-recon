@@ -57,21 +57,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         document.getElementById('securityScore').innerText = score + "/100";
 
-        // --- SIZINTILAR ---
+        // --- SIZINTILAR & BULGULAR ---
         secretList.innerHTML = "";
-        document.getElementById('secretCount').innerText = data.secrets ? data.secrets.length : 0;
-        if (data.secrets && data.secrets.length > 0) {
-            data.secrets.forEach(s => {
+        const allSecrets = data.secrets || [];
+        document.getElementById('secretCount').innerText = allSecrets.length;
+        
+        if (allSecrets.length > 0) {
+            allSecrets.forEach(s => {
                 const div = document.createElement('div');
                 div.className = "item-card secret-card";
+                // Kritiklik seviyesine göre renk belirle
+                let color = "var(--accent)";
+                if (s.type.includes("Kritik") || s.type.includes("Parola") || s.type.includes("Dosya")) color = "var(--danger)";
+                if (s.type.includes("Yorum")) color = "var(--warning)";
+
+                div.style.borderLeft = `3px solid ${color}`;
                 div.innerHTML = `
-                    <span class="secret-label">${s.type}</span>
-                    <div class="secret-content">${s.value}</div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span class="secret-label" style="background:${color}22; color:${color}; border:1px solid ${color}44;">${s.type}</span>
+                        <span style="font-size:0.6rem; color:var(--text-dim);">${s.source}</span>
+                    </div>
+                    <div class="secret-content" style="color:#eee;">${s.value}</div>
                 `;
                 secretList.appendChild(div);
             });
             riskBadge.innerText = "DANGER";
             riskBadge.className = "status-badge status-danger";
+        } else {
+            secretList.innerHTML = '<div class="empty-state">Hassas veri sızıntısı bulunamadı.</div>';
+        }
+
+        // --- ATTACK SURFACE (ENDPOINTS) ---
+        const endpointList = document.getElementById('endpointList');
+        if (endpointList) {
+            endpointList.innerHTML = "";
+            const endpoints = data.endpoints || [];
+            if (endpoints.length > 0) {
+                endpoints.forEach(e => {
+                    const div = document.createElement('div');
+                    div.className = "item-card";
+                    div.style.fontSize = "0.75rem";
+                    div.innerHTML = `<span style="color:var(--accent);">🔗</span> ${e}`;
+                    endpointList.appendChild(div);
+                });
+            } else {
+                endpointList.innerHTML = '<div class="empty-state">Dış bağlantı bulunamadı.</div>';
+            }
         }
 
         // --- ZAFİYETLER ---

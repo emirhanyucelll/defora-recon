@@ -1,1 +1,1 @@
-{"bxewcnthkvofspag":[{"id":"MAL-2022-1740","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"bxroccoli-funnqel":[{"id":"MAL-2022-1741","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"bxone-test-flowflowts":[{"id":"MAL-2024-1850","sev":"HIGH","r":[],"src":"OSV"}]}
+{"bxslider_wp":[{"id":"CVE-2022-33943","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

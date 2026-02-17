@@ -1,1 +1,1 @@
-{"fyre-utils":[{"id":"MAL-2025-4830","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"fyinance":[{"id":"MAL-2023-1853","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"fylet_secure_large_file_sender":[{"id":"CVE-2014-7098","sev":"HIGH","r":[{"exact":"2"}],"src":"NVD-MOP"}]}

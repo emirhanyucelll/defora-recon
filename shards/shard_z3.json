@@ -1,1 +1,1 @@
-{"z3fang":[{"id":"MAL-2025-71757","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"z3":[{"id":"CVE-2020-19725","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

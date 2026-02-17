@@ -1,1 +1,1 @@
-{"gjs-development-scripts":[{"id":"MAL-2025-21500","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"gjsdgjgjt6":[{"id":"MAL-2025-6421","sev":"HIGH","r":[],"src":"OSV"}]}
+{"gjots2":[{"id":"CVE-2017-17535","sev":"HIGH","r":[{"exact":"2.4.1"}],"src":"NVD-MOP"}],"gjson":[{"id":"CVE-2020-35380","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2020-36066","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2020-36067","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2021-42836","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

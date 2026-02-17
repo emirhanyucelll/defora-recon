@@ -1,0 +1,1 @@
+{"5ire":[{"id":"CVE-2025-47777","sev":"HIGH","r":[{"exact":"*","eExc":"0.11.1"}],"src":"NVD"},{"id":"CVE-2025-58357","sev":"HIGH","r":[{"exact":"0.13.2"}],"src":"NVD"}]}

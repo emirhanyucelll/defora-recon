@@ -1,1 +1,1 @@
-{"l2-contracts":[{"id":"MAL-2026-683","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"l2blocker":[{"id":"CVE-2022-33202","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"l2switch":[{"id":"CVE-2015-1610","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD-MOP"}]}

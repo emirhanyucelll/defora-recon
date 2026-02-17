@@ -80,7 +80,7 @@ chrome.webRequest.onHeadersReceived.addListener(
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.action === "SCAN_RESULTS") {
         const tabId = sender.tab.id;
-        let { secrets, tech } = request.data;
+        let { secrets, tech, endpoints, candidates } = request.data;
         const matches = []; const seen = new Set();
 
         if (detectedHeaders[tabId]) tech = [...tech, ...detectedHeaders[tabId]];
@@ -93,24 +93,41 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             if (!globalThis.scannedDomains.has(domain)) {
                 globalThis.scannedDomains.add(domain);
                 (async () => {
-                    const targets = [
+                    // Sabit Listemiz (Yüksek Olasılık)
+                    let targets = [
                         { path: '/.env', check: 'APP_KEY=' },
-                        { path: '/.git/HEAD', check: 'ref: refs/' },
-                        { path: '/.vscode/sftp.json', check: '"host":' }
+                        { path: '/.env.production', check: 'APP_KEY=' },
+                        { path: '/.git/config', check: '[core]' },
+                        { path: '/config.php.bak', check: '<?php' },
+                        { path: '/backup.zip', check: '' },
+                        { path: '/dump.sql', check: '' },
+                        { path: '/phpinfo.php', check: 'System' }
                     ];
+
+                    // Dinamik "x" Adaylarını Ekle
+                    const exts = ['.zip', '.sql', '.bak', '.tar.gz'];
+                    if (candidates) {
+                        candidates.forEach(c => {
+                            exts.forEach(ext => {
+                                targets.push({ path: `/${c}${ext}`, check: '' });
+                            });
+                        });
+                    }
+
                     for (const t of targets) {
                         try {
-                            await new Promise(r => setTimeout(r, 1000 + Math.random() * 2000));
-                            const resp = await fetch(url.origin + t.path, { method: 'GET', cache: 'no-store' });
+                            // Stealth: 400ms - 1200ms arası rastgele bekle
+                            await new Promise(r => setTimeout(r, 400 + Math.random() * 800));
+                            const resp = await fetch(url.origin + t.path, { method: 'HEAD', cache: 'no-store' });
                             if (resp.status === 200) {
-                                const text = await resp.text();
-                                if (text.includes(t.check)) {
+                                const size = resp.headers.get('content-length');
+                                if (size === null || parseInt(size) > 100) { 
                                     chrome.storage.local.get([`results_${tabId}`], (curr) => {
                                         let res = curr[`results_${tabId}`] || { secrets: [] };
                                         if(!res.secrets) res.secrets = [];
-                                        const already = res.secrets.find(s => s.value === t.path + " exposed!");
+                                        const already = res.secrets.find(s => s.value === t.path + " bulundu!");
                                         if (!already) {
-                                            res.secrets.push({ type: "CRITICAL FILE", value: t.path + " exposed!", source: "Active Scan" });
+                                            res.secrets.push({ type: "KRİTİK DOSYA", value: t.path + " bulundu!", source: "Active Scan" });
                                             chrome.action.setBadgeText({ text: "!", tabId: tabId });
                                             chrome.action.setBadgeBackgroundColor({ color: "#ef4444", tabId: tabId });
                                             chrome.storage.local.set({ [`results_${tabId}`]: res });
@@ -124,19 +141,25 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             }
         } catch(e) {}
 
-        for (const t of tech) {
+        // PARALEL TARAMA (TURBO MODE)
+        const scanPromises = tech.map(async (t) => {
             let fullName = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '');
-            if (!fullName || seen.has(fullName)) continue; seen.add(fullName);
+            if (!fullName || seen.has(fullName)) return null;
+            seen.add(fullName);
             
             const shard = await getShard(fullName);
             if (shard && shard[fullName]) {
                 const v = t.version || "Unknown";
                 const found = shard[fullName].filter(item => isVulnerable(v, item.r));
-                if (found.length > 0) matches.push({ tech: t.name, version: v, exploits: found, source: t.source });
+                if (found.length > 0) return { tech: t.name, version: v, exploits: found, source: t.source };
             }
-        }
+            return null;
+        });
 
-        chrome.storage.local.set({ [`results_${tabId}`]: { secrets, matches, tech, security, time: Date.now() } });
+        const results = await Promise.all(scanPromises);
+        results.filter(r => r !== null).forEach(r => matches.push(r));
+
+        chrome.storage.local.set({ [`results_${tabId}`]: { secrets, matches, tech, security, endpoints, time: Date.now() } });
         const high = security.some(s => s.risk === 'HIGH');
         if (secrets.length > 0 || matches.length > 0 || high) {
             chrome.action.setBadgeText({ text: "!", tabId: tabId });

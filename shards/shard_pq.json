@@ -1,1 +1,1 @@
-{"pqnlgmtdifawekzu":[{"id":"MAL-2022-5440","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"pquic":[{"id":"CVE-2024-25679","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

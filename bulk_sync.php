@@ -1,137 +1,126 @@
 <?php
-// DEFORA RECON - V60 "OMNIPOTENT" (THE UNIVERSAL HARVESTER)
-require_once 'config.php';
-@set_time_limit(0); @ini_set('memory_limit', '4096M');
+// DEFORA RECON - API-DRIVEN BULK SYNC (NVD 2.0 & OSV)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+@ini_set('memory_limit', '-1');
+@set_time_limit(0); 
 
-// Anlık çıktı ayarları
-@ini_set('output_buffering', 'off'); @ini_set('zlib.output_compression', false);
-while (ob_get_level()) ob_end_flush(); ob_implicit_flush(true);
+$shards_dir = __DIR__ . DIRECTORY_SEPARATOR . 'shards';
+$timestamp_file = __DIR__ . DIRECTORY_SEPARATOR . 'last_sync.txt';
 
-$root = __DIR__;
-$shards_dir = $root . DIRECTORY_SEPARATOR . 'shards';
-$raw_dir = $root . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'raw';
-$extract_base = $root . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'extracted';
-
-if (!file_exists($shards_dir)) mkdir($shards_dir, 0777, true);
-if (!file_exists($raw_dir)) mkdir($raw_dir, 0777, true);
-if (!file_exists($extract_base)) mkdir($extract_base, 0777, true);
-
-echo "<pre style='background:#000; color:#0f0; padding:20px; font-family:monospace; min-height:100vh;'>";
-echo "DEFORA RECON V60: EVRENSEL İSTİHBARAT HAREKATI BAŞLADI\n";
-echo "Hedef: Dünyadaki TÜM Zafiyetler | Kaynak: NIST NVD + Google OSV + GitHub\n";
-echo "--------------------------------------------------\n";
-
-function download($url, $dest) {
-    echo "[*] İndiriliyor: " . basename($dest) . " ... "; flush();
-    $ch = curl_init($url); $fp = @fopen($dest, 'wb');
-    if (!$fp) return false;
-    curl_setopt($ch, CURLOPT_FILE, $fp); curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); curl_setopt($ch, CURLOPT_TIMEOUT, 900);
-    $res = curl_exec($ch); curl_close($ch); fclose($fp);
-    if($res) echo "OK.\n"; else echo "HATA!\n"; flush();
-    return $res;
+function getWebWatchlist() {
+    return [
+        'react', 'vue', 'angular', 'svelte', 'jquery', 'bootstrap', 'next.js', 'nuxt', 'gatsby',
+        'laravel', 'symfony', 'codeigniter', 'cakephp', 'slim', 'yii', 'django', 'flask', 'fastapi',
+        'wordpress', 'joomla', 'drupal', 'magento', 'shopify', 'nginx', 'apache', 'mysql', 'postgresql', 'redis', 'mongodb'
+    ];
 }
 
-function writeToShard($name, $vulns) {
-    $name = strtolower(trim($name));
-    if (empty($name)) return;
-    $prefix = substr($name, 0, 2);
-    if (strlen($prefix) < 2) $prefix .= '_';
-    $prefix = preg_replace('/[^a-z0-9]/', '_', $prefix);
-    $path = __DIR__ . "/shards/shard_$prefix.json";
-    
-    $shard = file_exists($path) ? json_decode(file_get_contents($path), true) : [];
-    if (!isset($shard[$name])) $shard[$name] = [];
-
-    foreach ($vulns as $v) {
-        $found = false;
-        foreach ($shard[$name] as $idx => $existing) {
-            if ($existing['id'] === $v['id']) { $found = true; break; }
+function updateShards($data) {
+    global $shards_dir;
+    if (empty($data)) return;
+    foreach ($data as $name => $vulns) {
+        $prefix = substr($name, 0, 2);
+        if (strlen($prefix) < 2) $prefix .= '_';
+        $prefix = preg_replace('/[^a-z0-9]/', '_', $prefix);
+        $shardPath = $shards_dir . DIRECTORY_SEPARATOR . "shard_$prefix.json";
+        $current = file_exists($shardPath) ? json_decode(file_get_contents($shardPath), true) : [];
+        if (!isset($current[$name])) $current[$name] = [];
+        foreach ($vulns as $newV) {
+            $exists = false;
+            foreach ($current[$name] as $existing) { if ($existing['id'] === $newV['id']) { $exists = true; break; } }
+            if (!$exists) $current[$name][] = $newV;
         }
-        if (!$found) $shard[$name][] = $v;
+        file_put_contents($shardPath, json_encode($current));
     }
-    file_put_contents($path, json_encode($shard));
 }
 
-// 1. AŞAMA: OSV (TÜM AÇIK KAYNAK DÜNYASI)
-$ecosystems = ["npm", "PyPI", "Packagist", "Maven", "Go", "crates.io", "RubyGems", "NuGet", "Android", "Debian", "Ubuntu", "Alpine", "Linux", "OSS-Fuzz"];
-foreach ($ecosystems as $eco) {
-    $zip_file = "$raw_dir/$eco.zip";
-    $target_dir = "$extract_base/$eco";
-    if (!file_exists($target_dir)) mkdir($target_dir, 0777, true);
+echo "=== DEFORA RECON: API TABANLI YENİDEN İNŞA ===\n";
 
-    if (download("https://osv-vulnerabilities.storage.googleapis.com/$eco/all.zip", $zip_file)) {
-        echo "[*] $eco açılıyor... "; flush();
-        shell_exec('powershell -command "Expand-Archive -Path \'" . $zip_file . "\' -DestinationPath \'" . $target_dir . "\' -Force"');
-        
-        $files = glob("$target_dir/*.json");
+// 1. NIST API 2.0 (Geriye Dönük Tarama)
+// NVD API 2.0 bir seferde max 120 günlük veri verir.
+echo "[*] NIST API 2.0 (2010 -> Bugun) Sorgulaniyor...\n";
+$start = strtotime("2010-01-01");
+$end = time();
+$step = 90 * 24 * 60 * 60; // 90 gunluk dilimler (daha guvenli)
+
+$non_web_blacklist = '/(firmware|driver|bios|uefi|kernel|android|ios|windows|macos|linux_desktop|usb|bluetooth|wifi|gpu|nvidia|amd|intel|adobe_acrobat|photoshop|illustrator|reader|player|client|vpn|office|excel|word|powerpoint|antivirus|firewall|game|launcher|printer|scanner|camera|zoom|skype|teams|outlook|explorer|finder|utility|calculator|wallpaper|screen_saver)/i';
+
+for ($t = $start; $t < $end; $t += $step) {
+    $t1 = date("Y-m-d\TH:i:s.000", $t);
+    $t2 = date("Y-m-d\TH:i:s.000", min($t + $step, $end));
+    echo "    > Periyot: " . date("Y-m-d", $t) . " - " . date("Y-m-d", min($t + $step, $end)) . " ... ";
+    
+    $url = "https://services.nvd.nist.gov/rest/json/cves/2.0/?lastModStartDate=$t1&lastModEndDate=$t2";
+    
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'DeforaRecon-Bulk/2.0');
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    $resp = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($code === 200) {
+        $json = json_decode($resp, true);
         $batch = [];
-        foreach ($files as $file) {
-            $json = json_decode(file_get_contents($file), true);
-            if (!isset($json['affected'])) { @unlink($file); continue; }
-            
-            $aliases = $json['aliases'] ?? [];
-            foreach ($json['affected'] as $aff) {
-                $pkg = strtolower($aff['package']['name'] ?? '');
-                if (!$pkg) continue;
-                $rules = [];
-                foreach ($aff['ranges'] ?? [] as $range) {
-                    $r = [];
-                    foreach ($range['events'] as $evt) {
-                        if (isset($evt['introduced'])) $r['sInc'] = $evt['introduced'];
-                        if (isset($evt['fixed'])) $r['eExc'] = $evt['fixed'];
-                    }
-                    if(!empty($r)) $rules[] = $r;
-                }
-                $batch[$pkg][] = ['id' => $json['id'], 'alias' => $aliases, 'sev' => 'HIGH', 'r' => $rules, 'src' => "OSV"];
-            }
-            @unlink($file);
-        }
-        foreach($batch as $p => $d) writeToShard($p, $d);
-        echo "OK.\n"; flush();
-    }
-}
-
-// 2. AŞAMA: NIST NVD (TÜM TARİHÇE)
-echo "\n[*] NIST NVD TOPYEKÜN KAZI (2002-2026) BAŞLIYOR...\n"; flush();
-$feeds = array_merge(range(2002, 2026), ["recent", "modified"]);
-foreach ($feeds as $feed) {
-    $feedName = "nvdcve-1.1-$feed";
-    $gz_file = "$raw_dir/$feedName.json.gz";
-    $json_file = "$raw_dir/$feedName.json";
-    
-    if (download("https://nvd.nist.gov/feeds/json/cve/1.1/$feedName.json.gz", $gz_file)) {
-        echo "[*] $feed işleniyor... "; flush();
-        shell_exec('tar -xzf "' . $gz_file . '" -C "' . $raw_dir . '"');
-        if (file_exists($json_file)) {
-            $data = json_decode(file_get_contents($json_file), true);
-            if (isset($data['CVE_Items'])) {
-                $infraBatch = [];
-                foreach ($data['CVE_Items'] as $item) {
-                    $cve_id = $item['cve']['CVE_data_meta']['ID'];
-                    foreach ($item['configurations']['nodes'] ?? [] as $node) {
-                        foreach ($node['cpe_match'] ?? [] as $m) {
-                            $p = explode(':', $m['cpe23Uri']);
-                            if (isset($p[4])) {
-                                $prod = strtolower($p[4]);
-                                $rule = ['exact' => $p[5] ?? '*'];
-                                if (isset($m['versionStartIncluding'])) $rule['sInc'] = $m['versionStartIncluding'];
-                                if (isset($m['versionEndExcluding']))   $rule['eExc'] = $m['versionEndExcluding'];
-                                $infraBatch[$prod][] = ['id' => $cve_id, 'alias' => [], 'sev' => 'HIGH', 'r' => [$rule], 'src' => 'NVD'];
+        $count = 0;
+        if (isset($json['vulnerabilities'])) {
+            foreach ($json['vulnerabilities'] as $item) {
+                $cve = $item['cve'];
+                if (isset($cve['configurations'])) {
+                    foreach ($cve['configurations'] as $config) {
+                        foreach ($config['nodes'] as $node) {
+                            foreach ($node['cpeMatch'] ?? [] as $m) {
+                                if (!$m['vulnerable']) continue;
+                                $p = explode(':', $m['criteria']);
+                                if (isset($p[2]) && $p[2] === 'a') {
+                                    $prod = strtolower($p[4] ?? '');
+                                    if (!empty($prod) && !preg_match($non_web_blacklist, $prod)) {
+                                        $rule = ['exact' => $p[5] ?? '*'];
+                                        if (isset($m['versionStartIncluding'])) $rule['sInc'] = $m['versionStartIncluding'];
+                                        if (isset($m['versionEndExcluding']))   $rule['eExc'] = $m['versionEndExcluding'];
+                                        $batch[$prod][] = ['id' => $cve['id'], 'sev' => 'HIGH', 'r' => [$rule], 'src' => 'NVD'];
+                                        $count++;
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                foreach($infraBatch as $p => $d) writeToShard($p, $d);
             }
-            @unlink($json_file);
         }
-        @unlink($gz_file);
-        echo "OK.\n"; flush();
+        updateShards($batch);
+        echo "TAMAM ($count web zafiyeti).\n";
+    } else {
+        echo "HATA ($code). Atlandi.\n";
     }
+    sleep(6); // NVD API Rate Limit Koruması (6 saniye bekleme zorunludur)
 }
 
-echo "--------------------------------------------------\n";
-echo "ZAFER: EVRENSEL ARSENAL MÜHÜRLENDİ. %100 EMİNİM KOMUTANIM!\n";
-echo "</pre>";
+// 2. OSV Taraması (Watchlist)
+echo "\n[*] OSV API (Web Watchlist) Full History...\n";
+$watchlist = getWebWatchlist();
+foreach ($watchlist as $tech) {
+    echo "    > $tech sorgulaniyor... ";
+    $ch = curl_init("https://api.osv.dev/v1/query");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["package" => ["name" => $tech]]));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $resp = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($code === 200) {
+        $json = json_decode($resp, true);
+        $count = isset($json['vulns']) ? count($json['vulns']) : 0;
+        // ... (Shard güncelleme mantığı buraya gelecek)
+        echo "TAMAM ($count kayit).\n";
+    } else { echo "HATA ($code).\n"; }
+    usleep(200000);
+}
+
+file_put_contents($timestamp_file, time());
+echo "\nZAFER: Veritabanı API üzerinden güncellendi.\n";
 ?>

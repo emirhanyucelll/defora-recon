@@ -16,6 +16,7 @@
             <button class="tab-btn" data-tab="inventory">Envanter</button>
             <button class="tab-btn" data-tab="security">Güvenlik</button>
             <button class="tab-btn" data-tab="secrets">Sızıntılar</button>
+            <button class="tab-btn" data-tab="endpoints">Yüzey</button>
         </nav>
 
         <main id="contentArea">
@@ -48,6 +49,14 @@
                 <div id="secretList" class="list-container">
                     <div class="empty-state">Kod analizi bekleniyor...</div>
                 </div>
+            </div>
+
+            <!-- Yüzey Paneli -->
+            <div id="tab-endpoints" class="tab-pane">
+                 <div class="summary-bar">Tespit Edilen Bağlantılar (Attack Surface)</div>
+                 <div id="endpointList" class="list-container">
+                    <div class="empty-state">Bağlantı analizi bekleniyor...</div>
+                 </div>
             </div>
         </main>
 

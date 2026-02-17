@@ -1,1 +1,1 @@
-{"s7dzdggxm9v29ki2s1cykztjzveurn7o":[{"id":"MAL-2025-32597","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"s7-softplc":[{"id":"CVE-2016-8364","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

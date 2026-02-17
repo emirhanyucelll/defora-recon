@@ -1,1 +1,1 @@
-{"zwserver":[{"id":"GHSA-whcm-29f4-j4mx","sev":"HIGH","r":[{"sInc":"0.0.0"}],"src":"OSV"}],"zwork":[{"id":"MAL-2024-1602","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"zwirir":[{"id":"MAL-2024-9928","sev":"HIGH","r":[],"src":"OSV"}],"zworikso":[{"id":"MAL-2024-9929","sev":"HIGH","r":[],"src":"OSV"}],"zwctzz-devapptea":[{"id":"MAL-2025-111619","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"zwii":[{"id":"CVE-2011-0505","sev":"HIGH","r":[{"exact":"2.1.1"}],"src":"NVD-MOP"}],"zwserver":[{"id":"CVE-2017-16149","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

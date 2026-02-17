@@ -1,1 +1,1 @@
-{"s1assets":[{"id":"MAL-2022-5895","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"s1variables":[{"id":"MAL-2022-5896","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"s1e7ok":[{"id":"MAL-2025-32593","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"s1":[{"id":"CVE-2022-24046","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2022-24049","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2025-1048","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2025-1049","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

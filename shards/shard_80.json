@@ -1,1 +1,1 @@
-{"80000-coin-master-free-spins-rrtger":[{"id":"MAL-2025-42183","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"800xa":[{"id":"CVE-2021-22277","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"800xa_base_system":[{"id":"CVE-2024-3036","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

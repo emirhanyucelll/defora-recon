@@ -1,1 +1,1 @@
-{"7715-permissions-shared":[{"id":"MAL-2025-191493","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"7702-eoa-implementation":[{"id":"MAL-2025-6683","sev":"HIGH","r":[{"sInc":"1.0.3"}],"src":"OSV"}],"77z8zt":[{"id":"MAL-2025-7026","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"7725.com_three_kingdoms":[{"id":"CVE-2014-7428","sev":"HIGH","r":[{"exact":"2.4"}],"src":"NVD-MOP"}],"77_bank":[{"id":"CVE-2020-5523","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

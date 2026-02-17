@@ -1,1 +1,1 @@
-{"6sdgsd6s-control":[{"id":"MAL-2025-6898","sev":"HIGH","r":[{"sInc":"9999.0.0"}],"src":"OSV"}]}
+{"6shr_system":[{"id":"CVE-2024-8329","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2024-8330","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}

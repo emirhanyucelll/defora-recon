@@ -1,1 +1,1 @@
-{"h5bp-docs":[{"id":"MAL-2024-11168","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"h5guard":[{"id":"MAL-2024-1531","sev":"HIGH","r":[],"src":"OSV"}]}
+{"h5ai":[{"id":"CVE-2015-3203","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"h5p-css-editor":[{"id":"CVE-2021-39318","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"h5p":[{"id":"CVE-2024-3111","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

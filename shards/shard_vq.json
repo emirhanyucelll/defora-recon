@@ -1,1 +1,1 @@
-{"vqjvop-devapptea":[{"id":"MAL-2025-110634","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"vqasmdufyhwlcezb":[{"id":"MAL-2025-38631","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"vqkslritnjhyeugo":[{"id":"MAL-2025-38632","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"vquywzoakjtfnsmr":[{"id":"MAL-2025-38633","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"vqserver":[{"id":"CVE-2000-0240","sev":"HIGH","r":[{"exact":"1.9.9"}],"src":"NVD"},{"id":"CVE-2000-0241","sev":"HIGH","r":[{"exact":"1.9.9"}],"src":"NVD"}]}

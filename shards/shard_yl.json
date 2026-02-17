@@ -1,1 +1,1 @@
-{"ylropkmdjbvxiekt":[{"id":"MAL-2022-7354","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"yloomz-devapptea":[{"id":"MAL-2025-111306","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"ylsearch":[{"id":"MAL-2025-40551","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"ylctoken":[{"id":"CVE-2018-13226","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD-MOP"},{"id":"CVE-2018-13779","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD-MOP"}]}

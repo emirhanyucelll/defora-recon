@@ -1,1 +1,1 @@
-{"g2a-tooltip":[{"id":"MAL-2025-21102","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"g2plot-geo-world-map":[{"id":"MAL-2025-21103","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"g2_driver":[{"id":"CVE-2021-35449","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

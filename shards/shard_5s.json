@@ -1,1 +1,1 @@
-{"5string":[{"id":"MAL-2022-38","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"5sos_family_planet":[{"id":"CVE-2014-6694","sev":"HIGH","r":[{"exact":"2.3.4"}],"src":"NVD"}]}

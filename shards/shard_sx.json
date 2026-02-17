@@ -1,1 +1,1 @@
-{"sxeutmcfpkralghn":[{"id":"MAL-2022-6381","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"sxrcan.db":[{"id":"MAL-2024-7417","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"sxbznqp":[{"id":"MAL-2025-34303","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"sxg-playground":[{"id":"MAL-2025-3588","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"sxz":[{"id":"MAL-2025-3472","sev":"HIGH","r":[],"src":"OSV"}]}
+{"sxf_common_library":[{"id":"CVE-2015-2946","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}

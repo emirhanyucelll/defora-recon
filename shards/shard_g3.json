@@ -1,1 +1,1 @@
-{"g3lpbabel":[{"id":"MAL-2022-3261","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"g3w-suite":[{"id":"CVE-2023-29998","sev":"HIGH","r":[{"exact":"3.5"}],"src":"NVD"}],"g3_driver":[{"id":"CVE-2021-35449","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

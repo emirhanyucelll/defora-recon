@@ -1,1 +1,1 @@
-{"30000-coin-master-free-spins-ryhfsse":[{"id":"MAL-2025-42174","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"30a":[{"id":"CVE-2014-6726","sev":"HIGH","r":[{"exact":"5.26.2"}],"src":"NVD"}],"301_redirects":[{"id":"CVE-2019-19915","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2021-24142","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

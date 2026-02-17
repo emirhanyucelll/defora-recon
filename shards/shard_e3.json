@@ -1,1 +1,1 @@
-{"e3lectron":[{"id":"MAL-2025-19052","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"e3tt87":[{"id":"MAL-2025-19053","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"e3po":[{"id":"MAL-2024-10449","sev":"HIGH","r":[],"src":"OSV"}]}
+{"e355_web_ui":[{"id":"CVE-2014-2968","sev":"HIGH","r":[{"exact":"11.001.08.00.03"}],"src":"NVD-MOP"}],"e3":[{"id":"CVE-2014-8652","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2014-5429","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2015-0978","sev":"HIGH","r":[{"exact":"4.5"}],"src":"NVD-MOP"}]}

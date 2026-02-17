@@ -1,1 +1,1 @@
-{"x3-stock-graphql-demo":[{"id":"MAL-2022-7260","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"x3270":[{"id":"CVE-2012-5662","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"x3":[{"id":"CVE-2023-31867","sev":"HIGH","r":[{"exact":"12.14.0.50-0"}],"src":"NVD"},{"id":"CVE-2023-31868","sev":"HIGH","r":[{"exact":"12.14.0.50-0"}],"src":"NVD"}],"x3_cms":[{"id":"CVE-2011-5255","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2014-8771","sev":"HIGH","r":[{"exact":"0.5.1"}],"src":"NVD-MOP"},{"id":"CVE-2014-8772","sev":"HIGH","r":[{"exact":"0.5.1"}],"src":"NVD-MOP"}]}

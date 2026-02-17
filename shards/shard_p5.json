@@ -1,1 +1,1 @@
-{"p5-bbox-aligned-word":[{"id":"MAL-2025-28638","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"p5-encode":[{"id":"CVE-2021-36770","sev":"HIGH","r":[{"exact":"*","sInc":"3.05","eExc":"3.12"}],"src":"NVD"}],"p5-crypt-perl":[{"id":"CVE-2020-17478","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2020-13895","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

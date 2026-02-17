@@ -1,1 +1,1 @@
-{"f43wefr3wf":[{"id":"MAL-2022-2956","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"f443":[{"id":"MAL-2025-20124","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"f4_improvements":[{"id":"CVE-2024-9442","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

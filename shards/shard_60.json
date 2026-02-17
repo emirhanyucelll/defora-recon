@@ -1,1 +1,1 @@
-{"60000-coin-master-free-spins-rflmre":[{"id":"MAL-2025-42181","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"60cyclecms":[{"id":"CVE-2010-1951","sev":"HIGH","r":[{"exact":"2.5.2"}],"src":"NVD"},{"id":"CVE-2011-3696","sev":"HIGH","r":[{"exact":"2.5.2"}],"src":"NVD"}],"60indexpage":[{"id":"CVE-2024-0945","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2024-0946","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

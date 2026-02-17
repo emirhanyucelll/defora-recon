@@ -1,1 +1,1 @@
-{"0-shadowenv":[{"id":"MAL-2022-10","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"0-dns":[{"id":"MAL-2022-9","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"0-snap-score318":[{"id":"MAL-2025-6974","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"0-8":[{"id":"MAL-2025-2925","sev":"HIGH","r":[],"src":"OSV"}]}
+{"0.1.0":[{"id":"CVE-2010-1737","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}

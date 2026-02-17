@@ -1,1 +1,1 @@
-{"2jasmie":[{"id":"MAL-2022-23","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"2j_slideshow":[{"id":"CVE-2022-29426","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2020-36729","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2023-44242","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

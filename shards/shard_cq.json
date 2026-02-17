@@ -1,1 +1,1 @@
-{"cqbwogthvkuenakr":[{"id":"MAL-2022-2224","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"cquence":[{"id":"MAL-2025-17653","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"cqu_lankers":[{"id":"CVE-2018-17049","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

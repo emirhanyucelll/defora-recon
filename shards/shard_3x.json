@@ -1,1 +1,1 @@
-{"3x3s":[{"id":"MAL-2022-29","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"3x4abc":[{"id":"MAL-2025-7009","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"3x-ui":[{"id":"CVE-2025-29331","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

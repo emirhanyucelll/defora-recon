@@ -1,1 +1,1 @@
-{"zjjserver":[{"id":"GHSA-xgf5-5gjr-4hjq","sev":"HIGH","r":[{"sInc":"0.0.0"}],"src":"OSV"}],"zjdkvqcxmknipaye":[{"id":"MAL-2022-7394","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"zjcdbivmopyuawrf":[{"id":"MAL-2025-41023","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"zjclskkmenwrpodg":[{"id":"MAL-2025-41024","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"zjfyetwamqpivrug":[{"id":"MAL-2025-41025","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"zjjserver":[{"id":"CVE-2017-16201","sev":"HIGH","r":[{"exact":"1.0.0"}],"src":"NVD-MOP"}]}

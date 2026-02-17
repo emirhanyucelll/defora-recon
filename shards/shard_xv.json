@@ -1,1 +1,1 @@
-{"xv_chrome":[{"id":"MAL-2022-7303","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"xvpasfokuljqzhki":[{"id":"MAL-2022-7304","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"xvxx":[{"id":"MAL-2025-192656","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"xverginia4u":[{"id":"MAL-2025-2724","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"xv":[{"id":"CVE-2017-18215","sev":"HIGH","r":[{"exact":"3.10a"}],"src":"NVD-MOP"}]}

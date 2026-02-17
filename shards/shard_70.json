@@ -1,1 +1,1 @@
-{"70k-free-coin-master-spins-2023-dkzldki":[{"id":"MAL-2025-42182","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"701clientsql":[{"id":"CVE-2021-28271","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"701server":[{"id":"CVE-2021-28271","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"701serversql":[{"id":"CVE-2021-28271","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"701client":[{"id":"CVE-2021-28269","sev":"HIGH","r":[{"exact":"9.0.1"}],"src":"NVD-MOP"}]}

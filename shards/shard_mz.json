@@ -1,1 +1,1 @@
-{"mz-server":[{"id":"MAL-2022-4777","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"mzjbwp-devapptea":[{"id":"MAL-2025-106075","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"mz-require":[{"id":"MAL-2025-27037","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"mz-vue-datepicker":[{"id":"MAL-2025-27038","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"mzodal":[{"id":"MAL-2025-27039","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"mzip":[{"id":"MAL-2025-191799","sev":"HIGH","r":[],"src":"OSV"}]}
+{"mzone_login":[{"id":"CVE-2014-5665","sev":"HIGH","r":[{"exact":"1.2.0"}],"src":"NVD"}]}

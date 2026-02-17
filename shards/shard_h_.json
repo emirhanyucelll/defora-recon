@@ -1,1 +1,1 @@
-{"h_test1":[{"id":"MAL-2024-2445","sev":"HIGH","r":[],"src":"OSV"}],"h-jsencrypt":[{"id":"MAL-2026-495","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"h-sphere":[{"id":"CVE-2012-5004","sev":"HIGH","r":[{"exact":"3.3"}],"src":"NVD"},{"id":"CVE-2022-30777","sev":"HIGH","r":[{"exact":"3.6.2"}],"src":"NVD-MOP"}],"h-designer":[{"id":"CVE-2012-4696","sev":"HIGH","r":[{"exact":"6.5.0_b180_r1967"}],"src":"NVD-MOP"}],"h":[{"id":"CVE-2022-29334","sev":"HIGH","r":[{"exact":"1.0"}],"src":"NVD-MOP"}]}

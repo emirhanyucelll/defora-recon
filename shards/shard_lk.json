@@ -1,1 +1,1 @@
-{"lkauovkgjbridwhy":[{"id":"MAL-2022-4328","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"lkodash.isequa":[{"id":"MAL-2022-4329","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"lkmhvfiqzdoxntge":[{"id":"MAL-2025-25460","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"lkwoqtgnxcrkjupm":[{"id":"MAL-2025-25461","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"lknsupport":[{"id":"CVE-2012-1069","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

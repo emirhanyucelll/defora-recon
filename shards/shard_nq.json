@@ -1,1 +1,1 @@
-{"nqbcksuatvlgpkfy":[{"id":"MAL-2022-4953","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"nqizvyalgkfjtwmx":[{"id":"MAL-2022-4954","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"nqmgvefdscxarowk":[{"id":"MAL-2022-4955","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"nqm-auth-server":[{"id":"MAL-2025-27856","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"nquads":[{"id":"MAL-2025-27857","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"nq_mobile_security_\\&_antivirus":[{"id":"CVE-2014-5672","sev":"HIGH","r":[{"exact":"7.2.16.00"}],"src":"NVD-MOP"}]}

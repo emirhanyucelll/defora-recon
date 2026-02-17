@@ -1,1 +1,1 @@
-{"t2c-web-admin":[{"id":"MAL-2025-34355","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"t24":[{"id":"CVE-2019-14251","sev":"HIGH","r":[{"exact":"r15.01"}],"src":"NVD"}]}

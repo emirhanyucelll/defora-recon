@@ -1,1 +1,1 @@
-{"8.9.4":[{"id":"GHSA-725f-3pw7-rq6x","sev":"HIGH","r":[{"sInc":"0.0.0"}],"src":"OSV"},{"id":"MAL-2025-7030","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"8_minutes_abs_workout":[{"id":"CVE-2014-5794","sev":"HIGH","r":[{"exact":"2.0.9"}],"src":"NVD"}]}

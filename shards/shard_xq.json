@@ -1,1 +1,1 @@
-{"xqrunner":[{"id":"MAL-2025-39921","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"xquest":[{"id":"CVE-2016-4980","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}

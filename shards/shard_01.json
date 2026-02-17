@@ -1,1 +1,1 @@
-{"01template1":[{"id":"MAL-2022-11","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"010_editor":[{"id":"CVE-2010-5229","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2019-12551","sev":"HIGH","r":[{"exact":"9.0.1"}],"src":"NVD"},{"id":"CVE-2019-12552","sev":"HIGH","r":[{"exact":"9.0.1"}],"src":"NVD"}],"012_ps_multi_languages":[{"id":"CVE-2024-8723","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

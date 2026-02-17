@@ -1,1 +1,1 @@
-{"b39zz":[{"id":"MAL-2024-8742","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"b3rnt7":[{"id":"MAL-2024-9127","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"b3dtiles-sample":[{"id":"MAL-2025-191507","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"b3d":[{"id":"CVE-2020-13878","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2020-13879","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2020-13880","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

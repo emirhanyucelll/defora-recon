@@ -1,0 +1,1 @@
+{"1crm_on-premise":[{"id":"CVE-2019-14221","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"1crm":[{"id":"CVE-2020-15958","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"1c\\":[{"id":"CVE-2021-3131","sev":"HIGH","r":[{"exact":"enterprise"}],"src":"NVD-MOP"}],"1cdn":[{"id":"CVE-2021-32616","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

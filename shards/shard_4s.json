@@ -1,0 +1,1 @@
+{"4site_cms":[{"id":"CVE-2010-4152","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"4st_l-bems":[{"id":"CVE-2021-37291","sev":"HIGH","r":[{"exact":"1.0.0"}],"src":"NVD-MOP"},{"id":"CVE-2021-37292","sev":"HIGH","r":[{"exact":"1.0.0"}],"src":"NVD-MOP"},{"id":"CVE-2021-37293","sev":"HIGH","r":[{"exact":"1.0.0"}],"src":"NVD-MOP"}]}

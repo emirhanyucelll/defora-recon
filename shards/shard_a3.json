@@ -1,1 +1,1 @@
-{"a39a85e7":[{"id":"MAL-2024-11287","sev":"HIGH","r":[],"src":"OSV"}]}
+{"a320-x":[{"id":"CVE-2018-7259","sev":"HIGH","r":[{"exact":"2.0.1.231"}],"src":"NVD-MOP"}],"a3_portfolio":[{"id":"CVE-2023-29097","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

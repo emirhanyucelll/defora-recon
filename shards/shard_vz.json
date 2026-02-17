@@ -1,1 +1,1 @@
-{"vzyfxaumldnesjor":[{"id":"MAL-2022-7014","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"vzctl":[{"id":"CVE-2015-6927","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}

@@ -1,0 +1,1 @@
+{"x7_chat":[{"id":"CVE-2012-6047","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2014-8998","sev":"HIGH","r":[{"exact":"2.0.0"}],"src":"NVD-MOP"}],"x710_series_driver":[{"id":"CVE-2016-8105","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

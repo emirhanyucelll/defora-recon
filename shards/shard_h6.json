@@ -1,1 +1,1 @@
-{"h6mlentiies":[{"id":"MAL-2022-3544","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"h65vd2":[{"id":"MAL-2025-22088","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"h6web":[{"id":"CVE-2025-1270","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD"},{"id":"CVE-2025-1271","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD"}]}

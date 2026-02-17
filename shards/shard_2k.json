@@ -1,1 +1,1 @@
-{"2k-utils":[{"id":"MAL-2022-24","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"2key-metrics":[{"id":"MAL-2022-25","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"2kit":[{"id":"MAL-2022-26","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"2klic-api-engine":[{"id":"MAL-2025-7001","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"2kb_amazon_affiliates_store":[{"id":"CVE-2017-14622","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2022-40968","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

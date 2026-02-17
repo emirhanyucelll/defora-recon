@@ -1,1 +1,1 @@
-{"n158":[{"id":"GHSA-549h-r7g9-2qpf","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"n11-chatbot":[{"id":"MAL-2025-2559","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"n11-web-client":[{"id":"MAL-2025-2560","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"n1-avatars":[{"id":"MAL-2025-27042","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"n11-ui":[{"id":"MAL-2025-3158","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}],"n1trobrdr":[{"id":"MAL-2024-5393","sev":"HIGH","r":[],"src":"OSV"}]}
+{"n158":[{"id":"CVE-2023-26127","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

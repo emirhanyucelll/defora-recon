@@ -1,1 +1,1 @@
-{"p12_front-end-with-react":[{"id":"MAL-2025-28637","sev":"HIGH","r":[{"sInc":"0"}],"src":"OSV"}]}
+{"p11-kit":[{"id":"CVE-2020-29361","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2020-29362","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2020-29363","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}

@@ -1,0 +1,1 @@
+{"g41_driver":[{"id":"CVE-2011-2604","sev":"HIGH","r":[{"exact":"6.14.10.5355"}],"src":"NVD-MOP"}],"g4_driver":[{"id":"CVE-2021-35449","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
