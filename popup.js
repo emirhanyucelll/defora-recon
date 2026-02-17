@@ -1,50 +1,53 @@
-// DEFORA RECON - TACTICAL HUD CONTROL (V61 - STABILIZED)
+// DEFORA RECON - HUD CONTROL (V63 - PROFESSIONAL LIGHT THEME)
 document.addEventListener('DOMContentLoaded', async () => {
     const secretList = document.getElementById('secretList');
     const vulnList = document.getElementById('vulnList');
     const riskBadge = document.getElementById('riskBadge');
     
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+
     const result = await chrome.storage.local.get(`results_${tab.id}`);
     const data = result ? result[`results_${tab.id}`] : null;
 
-    if (data) render(data);
+    if (data) {
+        try { render(data); } catch (e) { console.error("Render hatasi:", e); }
+    }
 
     function render(data) {
         // --- ENVANTER ---
         const inventoryList = document.getElementById('inventoryList');
-        inventoryList.innerHTML = "";
-        const allTech = data.tech || [];
-        document.getElementById('inventoryCount').innerText = allTech.length;
-        if (allTech.length > 0) {
+        if (inventoryList) {
+            inventoryList.innerHTML = "";
+            const allTech = data.tech || [];
+            const invCount = document.getElementById('inventoryCount');
+            if(invCount) invCount.innerText = allTech.length;
+            
             allTech.forEach(t => {
                 const div = document.createElement('div');
                 div.className = "item-card";
                 div.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span class="tech-name-highlight">${t.name}</span>
-                        <span class="tech-version-pill">${t.version}</span>
+                        <span class="tech-version-pill">${t.version || 'Unknown'}</span>
                     </div>
                 `;
                 inventoryList.appendChild(div);
             });
-        } else {
-             inventoryList.innerHTML = '<div class="empty-state">Teknoloji tespit edilemedi.</div>';
         }
 
         // --- GÜVENLİK ---
         const securityList = document.getElementById('securityList');
-        securityList.innerHTML = "";
-        const securityData = data.security || [];
-        let score = 100;
-        if (securityData.length > 0) {
+        if (securityList) {
+            securityList.innerHTML = "";
+            const securityData = data.security || [];
+            let score = 100;
             securityData.forEach(s => {
                 if(s.risk === 'HIGH') score -= 20;
-                if(s.risk === 'MEDIUM') score -= 10;
-                if(s.risk === 'LOW') score -= 5;
+                else if(s.risk === 'MEDIUM') score -= 10;
                 const div = document.createElement('div');
                 div.className = "item-card";
-                div.style.borderLeft = `3px solid ${s.risk === 'HIGH' ? 'var(--danger)' : (s.risk === 'MEDIUM' ? 'var(--warning)' : 'var(--accent)')}`;
+                div.style.borderLeft = `3px solid ${s.risk === 'HIGH' ? 'var(--danger)' : 'var(--warning)'}`;
                 div.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:900; color:#fff; font-size:0.8rem;">${s.name}</span>
@@ -54,22 +57,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
                 securityList.appendChild(div);
             });
+            if(document.getElementById('securityScore')) document.getElementById('securityScore').innerText = score + "/100";
         }
-        document.getElementById('securityScore').innerText = score + "/100";
 
-        // --- SIZINTILAR & BULGULAR ---
-        secretList.innerHTML = "";
-        const allSecrets = data.secrets || [];
-        document.getElementById('secretCount').innerText = allSecrets.length;
-        
-        if (allSecrets.length > 0) {
+        // --- SIZINTILAR (KONUM DÜZELTİLDİ) ---
+        if (secretList) {
+            secretList.innerHTML = "";
+            const allSecrets = data.secrets || [];
+            if(document.getElementById('secretCount')) document.getElementById('secretCount').innerText = allSecrets.length;
+            
             allSecrets.forEach(s => {
                 const div = document.createElement('div');
                 div.className = "item-card secret-card";
                 let color = "var(--accent)";
                 if (s.type.includes("Kritik") || s.type.includes("Parola") || s.type.includes("Dosya")) color = "var(--danger)";
-                if (s.type.includes("Yorum")) color = "var(--warning)";
-
+                
                 let path = "/";
                 try { if(s.url) path = new URL(s.url).pathname; } catch(e) {}
 
@@ -77,145 +79,139 @@ document.addEventListener('DOMContentLoaded', async () => {
                 div.innerHTML = `
                     <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                         <span class="secret-label" style="background:${color}22; color:${color}; border:1px solid ${color}44;">${s.type}</span>
-                        <span style="font-size:0.55rem; color:var(--accent); opacity:0.9; font-weight:bold;">📍 ${path}</span>
+                        ${s.url ? `<span style="font-size:0.6rem; color:var(--accent); font-weight:600;">YOL: ${path}</span>` : ''}
                     </div>
                     <div class="secret-content" style="color:#eee; font-weight:bold; word-break: break-all;">${s.value}</div>
                 `;
                 secretList.appendChild(div);
             });
-            riskBadge.innerText = "DANGER";
-            riskBadge.className = "status-badge status-danger";
-        } else {
-            secretList.innerHTML = '<div class="empty-state">Hassas veri sızıntısı bulunamadı.</div>';
         }
 
-        // --- ATTACK SURFACE (ENDPOINTS) ---
+        // --- YÜZEY (ENDPOINTS) ---
         const endpointList = document.getElementById('endpointList');
         if (endpointList) {
             endpointList.innerHTML = "";
             const endpoints = data.endpoints || [];
-            if (endpoints.length > 0) {
-                endpoints.forEach(e => {
-                    const div = document.createElement('div');
-                    div.className = "item-card";
-                    div.style.fontSize = "0.75rem";
-                    div.innerHTML = `<span style="color:var(--accent);">🔗</span> ${e}`;
-                    endpointList.appendChild(div);
-                });
-            } else {
-                endpointList.innerHTML = '<div class="empty-state">Dış bağlantı bulunamadı.</div>';
-            }
+            endpoints.forEach(e => {
+                const div = document.createElement('div');
+                div.className = "item-card";
+                div.style.fontSize = "0.75rem";
+                div.innerHTML = `<span style="color:var(--accent); margin-right:5px;">•</span> ${e}`;
+                endpointList.appendChild(div);
+            });
         }
 
         // --- ZAFİYETLER ---
-        vulnList.innerHTML = "";
-        if (data.matches && data.matches.length > 0) {
-            data.matches.forEach(m => {
-                const div = document.createElement('div');
-                div.className = "item-card";
-                const cveTags = m.exploits.map(ex => `<span class="cve-tag">${ex.id}</span>`).join(' ');
-                div.innerHTML = `
-                    <div class="card-top">
-                        <span class="tech-title">${m.tech} ${m.version}</span>
-                        <span class="tech-count">${m.exploits.length} TEHDİT</span>
-                    </div>
-                    <div class="cve-list">${cveTags}</div>
-                `;
-                vulnList.appendChild(div);
-            });
-            riskBadge.innerText = "DANGER";
-            riskBadge.className = "status-badge status-danger";
-        } else {
-            vulnList.innerHTML = '<div class="empty-state">Kritik tehdit tespit edilmedi.</div>';
+        if (vulnList) {
+            vulnList.innerHTML = "";
+            if (data.matches && data.matches.length > 0) {
+                data.matches.forEach(m => {
+                    const div = document.createElement('div');
+                    div.className = "item-card";
+                    const cveTags = m.exploits.map(ex => `<span class="cve-tag">${ex.id}</span>`).join(' ');
+                    div.innerHTML = `
+                        <div class="card-top">
+                            <span class="tech-title">${m.tech} ${m.version}</span>
+                            <span class="tech-count">${m.exploits.length} TEHDİT</span>
+                        </div>
+                        <div class="cve-list">${cveTags}</div>
+                    `;
+                    vulnList.appendChild(div);
+                });
+            }
         }
     }
 
-    // --- REPORT EXPORTER ---
+    // --- REPORT EXPORTER (PROFESSIONAL LIGHT THEME) ---
     const exportBtn = document.getElementById('exportReport');
     if (exportBtn) {
         exportBtn.addEventListener('click', () => {
             if (!data) return;
             const domain = new URL(tab.url).hostname;
-            const score = document.getElementById('securityScore').innerText;
+            const score = document.getElementById('securityScore')?.innerText || "--";
             
             const vulnHTML = (data.matches || []).map(m => `
-                <div class="report-card">
-                    <div class="report-card-title">${m.tech} <small>${m.version}</small></div>
-                    <div class="tag-container">
-                        ${m.exploits.map(ex => `<span class="badge badge-danger">${ex.id}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
+                <div class="report-section-item">
+                    <div class="item-header"><strong>${m.tech}</strong> <span class="text-muted">${m.version}</span></div>
+                    <div class="tag-row">${m.exploits.map(ex => `<span class="tag-danger">${ex.id}</span>`).join('')}</div>
+                </div>`).join('');
 
             const secretHTML = (data.secrets || []).map(s => {
                 let p = "/"; try { if(s.url) p = new URL(s.url).pathname; } catch(e) {}
                 return `
-                <div class="report-card">
-                    <div style="display:flex; justify-content:space-between; align-items:start;">
-                        <span class="badge badge-warning">${s.type}</span>
-                        <span style="font-size:0.7rem; color:#888;">📍 ${p}</span>
+                <div class="report-section-item">
+                    <div class="item-header">
+                        <span class="type-label">${s.type}</span>
+                        <span class="path-label">Konum: ${p}</span>
                     </div>
-                    <div style="font-family:monospace; background:#1a1a1a; color:#0f0; padding:8px; border-radius:4px; margin-top:8px; word-break:break-all; font-size:0.85rem; border:1px solid #333;">${s.value}</div>
+                    <div class="code-box">${s.value}</div>
                 </div>`;
             }).join('');
 
-            const endpointHTML = (data.endpoints || []).map(e => `<div class="endpoint-item">🔗 ${e}</div>`).join('');
+            const endpointHTML = (data.endpoints || []).map(e => `<div class="endpoint-link">${e}</div>`).join('');
 
             const reportHTML = `
             <!DOCTYPE html>
             <html lang="tr">
             <head>
                 <meta charset="UTF-8">
-                <title>Recon Report - ${domain}</title>
+                <title>Recon Analiz - ${domain}</title>
                 <style>
-                    :root { --bg: #0a0a0a; --card: #141414; --text: #e0e0e0; --accent: #2563eb; --danger: #ef4444; --warning: #f59e0b; }
-                    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; margin: 0; padding: 40px; }
-                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-                    h1 { margin: 0; font-size: 1.5rem; letter-spacing: -0.5px; }
-                    .score-box { text-align: right; }
-                    .score-val { font-size: 2rem; font-weight: 900; color: var(--accent); }
-                    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
-                    .section { margin-bottom: 40px; }
-                    h2 { font-size: 1rem; text-transform: uppercase; color: #888; border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 20px; }
-                    .report-card { background: var(--card); border: 1px solid #222; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-                    .report-card-title { font-weight: 700; margin-bottom: 10px; }
-                    .badge { font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
-                    .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
-                    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
-                    .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-                    .tech-item { background: var(--card); border: 1px solid #222; padding: 10px; border-radius: 6px; font-size: 0.85rem; }
-                    .endpoint-list { background: var(--card); border: 1px solid #222; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-                    .endpoint-item { color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-                    footer { margin-top: 60px; border-top: 1px solid #333; padding-top: 20px; text-align: center; color: #555; font-size: 0.8rem; }
+                    body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; background: #f9fafb; margin: 0; padding: 50px; line-height: 1.6; }
+                    .report-container { max-width: 900px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #eee; }
+                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3b82f6; padding-bottom: 25px; margin-bottom: 40px; }
+                    h1 { margin: 0; color: #1e3a8a; font-size: 24px; font-weight: 800; }
+                    .score-circle { width: 80px; height: 80px; border-radius: 50%; background: #eff6ff; border: 4px solid #3b82f6; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+                    .score-circle .val { font-size: 20px; font-weight: 900; color: #3b82f6; line-height: 1; }
+                    .score-circle .lbl { font-size: 9px; font-weight: 700; color: #60a5fa; }
+                    h2 { font-size: 14px; text-transform: uppercase; color: #64748b; letter-spacing: 1px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+                    .report-section-item { margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #edf2f7; }
+                    .item-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+                    .type-label { font-weight: 800; color: #1e293b; }
+                    .path-label { color: #3b82f6; font-family: monospace; font-size: 12px; }
+                    .code-box { font-family: 'Consolas', monospace; background: #1e293b; color: #34d399; padding: 12px; border-radius: 6px; font-size: 13px; word-break: break-all; }
+                    .tag-danger { background: #fee2e2; color: #b91c1c; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 5px; border: 1px solid #fecaca; }
+                    .tag-row { margin-top: 8px; }
+                    .endpoint-link { font-family: monospace; color: #64748b; font-size: 12px; margin-bottom: 4px; }
+                    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+                    .text-muted { color: #94a3b8; font-weight: 400; }
+                    footer { margin-top: 50px; text-align: center; font-size: 12px; color: #cbd5e1; border-top: 1px solid #f1f5f9; padding-top: 20px; }
                 </style>
             </head>
             <body>
-                <div class="header">
-                    <div>
-                        <h1>Defora Recon | Analiz Raporu</h1>
-                        <div style="color:#666; font-size:0.9rem;">Hedef: <strong>${domain}</strong></div>
+                <div class="report-container">
+                    <div class="header">
+                        <div>
+                            <h1>Defora Recon | Analiz Raporu</h1>
+                            <div style="color:#64748b; margin-top:5px;">Hedef: <strong>${domain}</strong></div>
+                        </div>
+                        <div class="score-circle">
+                            <div class="lbl">GÜVENLİK</div>
+                            <div class="val">${score.split('/')[0]}</div>
+                            <div class="lbl">PUANI</div>
+                        </div>
                     </div>
-                    <div class="score-box">
-                        <div style="font-size:0.7rem; color:#888;">GÜVENLİK PUANI</div>
-                        <div class="score-val">${score}</div>
-                        <div style="font-size:0.7rem; color:#555;">${new Date().toLocaleString()}</div>
+
+                    <div class="grid-2">
+                        <div>
+                            <h2>Zafiyet Bulguları</h2>
+                            ${vulnHTML || '<div class="report-section-item" style="color:#10b981;">Bilinen zafiyet tespit edilmedi.</div>'}
+                        </div>
+                        <div>
+                            <h2>Veri Sızıntıları</h2>
+                            ${secretHTML || '<div class="report-section-item" style="color:#10b981;">Hassas veri bulunamadı.</div>'}
+                        </div>
                     </div>
+
+                    <div style="margin-top: 30px;">
+                        <h2>Saldırı Yüzeyi (Endpoints)</h2>
+                        <div class="report-section-item">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr;">${endpointHTML || 'Bağlantı yok.'}</div>
+                        </div>
+                    </div>
+
+                    <footer>Bu rapor Defora Recon tarafından ${new Date().toLocaleString()} tarihinde oluşturulmuştur.</footer>
                 </div>
-                <div class="grid">
-                    <div class="section">
-                        <h2>Zafiyet Taraması</h2>
-                        ${vulnHTML || '<div class="report-card">✓ Zafiyet bulunamadı.</div>'}
-                    </div>
-                    <div class="section">
-                        <h2>Veri Sızıntıları</h2>
-                        ${secretHTML || '<div class="report-card">✓ Sızıntı bulunamadı.</div>'}
-                    </div>
-                </div>
-                <div class="section">
-                    <h2>Saldırı Yüzeyi</h2>
-                    <div class="endpoint-list">${endpointHTML || 'Bağlantı bulunamadı.'}</div>
-                </div>
-                <footer>Defora Recon tarafından otomatik oluşturulmuştur.</footer>
             </body>
             </html>`;
 
@@ -223,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `RECON_REPORT_${domain.replace(/\./g, '_')}.html`;
+            a.download = `RECON_ANALYSIS_${domain.replace(/\./g, '_')}.html`;
             a.click();
         });
     }
@@ -231,10 +227,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- TAB SWITCHER ---
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            const tabId = btn.dataset.tab;
+            if (!tabId) return;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+            const targetPane = document.getElementById(`tab-${tabId}`);
+            if (targetPane) targetPane.classList.add('active');
         });
     });
 });
