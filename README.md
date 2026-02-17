@@ -16,10 +16,10 @@ Eklentiyi hemen kullanmaya başlamak için:
 ### 🛠️ Neler Yapıyor?
 - **Web Odaklı Analiz:** Sadece web teknolojilerini (kütüphane, sunucu, veritabanı vb.) tarar. Windows veya Android gibi bu araçla alakası olmayan verileri ayıklayarak sistemi temiz tutuyorum.
 - **Anlık Tespit:** Sayfa yüklendiği an teknolojileri ve CVE zafiyetlerini yarım saniyenin altında bir sürede listeler.
-- **Sızıntı Avcısı:** Kaynak kodda unutulan gizli yorumları, API anahtarlarını ve veritabanı bağlantılarını bulur.
-- **Dinamik Keşif:** URL ve sayfa yapısına bakarak sızdırılmış olabilecek yedek dosyalarını (`.zip`, `.sql`, `.bak` vb.) otomatik olarak arar.
-- **Saldırı Yüzeyi:** Sitenin dış bağlantılarını ve alt alan adlarını ayıklayarak bir harita çıkarır.
-- **Otomatik Güncelleme:** Arka planda çalışan sistemim sayesinde zafiyet veritabanını her gün NIST ve OSV üzerinden güncel tutuyorum.
+- **Otomatik Tam Tarama (Full Scan):** Tek tıkla tüm siteyi gezen bir "Örümcek" motoru ekledim. Bu motor `robots.txt` dosyalarını analiz eder, gizli yolları bulur ve bulduğu tüm subdomainleri otomatik olarak yoklar.
+- **Sızıntı Avcısı:** Kaynak kodda unutulan gizli yorumları, API anahtarlarını, veritabanı bağlantılarını ve sızdırılmış dosyaları bulur.
+- **Dış Kaynak Analizi:** Sitenin konuştuğu tüm dış servisleri ve alt alan adlarını ayıklayarak bir harita çıkarır.
+- **Akıllı Raporlama:** Tarama bittiğinde tüm bulguları profesyonel, aydınlık temalı bir rapor olarak otomatik indirir.
 
 ---
 
@@ -36,7 +36,7 @@ To use the extension immediately:
 ### 🛠️ Features
 - **Web-Focused:** I filter the data to target only web stack vulnerabilities, removing unnecessary OS or hardware noise.
 - **Fast Scanning:** Detects technologies and CVE matches in less than 0.5s.
+- **Intelligence Spider (Full Scan):** A built-in crawler that explores the entire site, parses `robots.txt` for hidden paths, and automatically probes discovered subdomains for leaks.
 - **Secret Scraper:** Finds hidden developer comments, API keys, and DB credentials in the source code.
-- **Dynamic Probing:** Automatically identifies and checks for potentially exposed backup files (`.zip`, `.sql`, `.bak`).
-- **Attack Surface:** Lists all external endpoints and subdomains found on the page.
-- **Always Fresh:** My backend system keeps the vulnerability data synchronized daily with NIST and OSV sources.
+- **External Resource Mapping:** Lists all external endpoints and subdomains found on the page.
+- **Auto-Reporting:** Automatically generates and downloads a professional light-themed audit report after the scan completes.

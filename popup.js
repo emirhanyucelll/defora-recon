@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(document.getElementById('securityScore')) document.getElementById('securityScore').innerText = score + "/100";
         }
 
-        // --- SIZINTILAR (KONUM DÜZELTİLDİ) ---
+        // --- SIZINTILAR (YOL KALDIRILDI) ---
         if (secretList) {
             secretList.innerHTML = "";
             const allSecrets = data.secrets || [];
@@ -72,14 +72,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let color = "var(--accent)";
                 if (s.type.includes("Kritik") || s.type.includes("Parola") || s.type.includes("Dosya")) color = "var(--danger)";
                 
-                let path = "/";
-                try { if(s.url) path = new URL(s.url).pathname; } catch(e) {}
-
                 div.style.borderLeft = `3px solid ${color}`;
                 div.innerHTML = `
                     <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                         <span class="secret-label" style="background:${color}22; color:${color}; border:1px solid ${color}44;">${s.type}</span>
-                        ${s.url ? `<span style="font-size:0.6rem; color:var(--accent); font-weight:600;">YOL: ${path}</span>` : ''}
                     </div>
                     <div class="secret-content" style="color:#eee; font-weight:bold; word-break: break-all;">${s.value}</div>
                 `;
@@ -87,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // --- YÜZEY (ENDPOINTS) ---
+        // --- DIŞ KAYNAKLAR (ESKİ YÜZEY) ---
         const endpointList = document.getElementById('endpointList');
         if (endpointList) {
             endpointList.innerHTML = "";
@@ -204,7 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
 
                     <div style="margin-top: 30px;">
-                        <h2>Saldırı Yüzeyi (Endpoints)</h2>
+                        <h2>Dış Kaynaklar</h2>
                         <div class="report-section-item">
                             <div style="display:grid; grid-template-columns: 1fr 1fr;">${endpointHTML || 'Bağlantı yok.'}</div>
                         </div>
@@ -223,6 +219,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             a.click();
         });
     }
+
+    // --- FULL SCAN HANDLER ---
+    const fullScanBtn = document.getElementById('fullScan');
+    if (fullScanBtn) {
+        fullScanBtn.addEventListener('click', () => {
+            chrome.runtime.sendMessage({ action: "START_FULL_SCAN", tabId: tab.id, url: tab.url });
+            fullScanBtn.innerText = "TARANIYOR...";
+            fullScanBtn.disabled = true;
+            document.getElementById('scanProgress').style.display = 'block';
+        });
+    }
+
+    chrome.runtime.onMessage.addListener((msg) => {
+        if (request.action === "FULL_SCAN_PROGRESS") {
+            document.getElementById('progressCount').innerText = `${msg.current}/${msg.total}`;
+        }
+        if (request.action === "FULL_SCAN_COMPLETE") {
+            fullScanBtn.innerText = "SCAN COMPLETE";
+            // Sonuçları storage'a yaz
+            chrome.storage.local.set({ [`results_${tab.id}`]: msg.data }, () => {
+                render(msg.data);
+                // OTOMATİK RAPOR İNDİRME
+                exportBtn.click();
+                setTimeout(() => { 
+                    document.getElementById('scanProgress').style.display = 'none';
+                    fullScanBtn.innerText = "FULL SCAN";
+                    fullScanBtn.disabled = false;
+                }, 2000);
+            });
+        }
+    });
 
     // --- TAB SWITCHER ---
     document.querySelectorAll('.tab-btn').forEach(btn => {

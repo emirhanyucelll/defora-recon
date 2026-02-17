@@ -195,13 +195,16 @@ foreach ($watchlist as $tech) {
                 // OSV 'modified' tarihini kontrol et
                 $vMod = isset($v['modified']) ? strtotime($v['modified']) : 0;
                 if ($vMod > $last_run) {
-                    // ID Formatlama: CVE varsa onu kullan, yoksa GHSA
-                    $displayId = $v['id'];
+                    // ID FORMATLAMA: CVE Öncelikli, GHSA Destekli
+                    $cve_id = null;
                     if (isset($v['aliases'])) {
                         foreach ($v['aliases'] as $alias) {
-                            if (strpos($alias, 'CVE-') === 0) { $displayId = $alias; break; }
+                            if (strpos($alias, 'CVE-') === 0) { $cve_id = $alias; break; }
                         }
                     }
+                    
+                    // Görünüm: CVE-2024-1234 (GHSA-xxxx) veya sadece GHSA-xxxx
+                    $displayId = $cve_id ? $cve_id : $v['id'];
 
                     $rules = [];
                     if (isset($v['affected'])) {

@@ -61,9 +61,13 @@
         </main>
 
         <footer>
-            <div id="lastUpdate">STATUS: OPERATIONAL</div>
-            <button id="exportReport" style="background:var(--accent); color:white; border:none; padding:4px 12px; border-radius:4px; font-size:0.6rem; font-weight:900; cursor:pointer; box-shadow:0 0 10px var(--accent-glow);">EXPORT REPORT</button>
+            <div id="lastUpdate" style="font-size:0.5rem; opacity:0.5;">STATUS: READY</div>
+            <div style="display:flex; gap:5px;">
+                <button id="fullScan" style="background:#1e293b; color:white; border:1px solid #333; padding:4px 8px; border-radius:4px; font-size:0.6rem; font-weight:900; cursor:pointer;">FULL SCAN</button>
+                <button id="exportReport" style="background:var(--accent); color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.6rem; font-weight:900; cursor:pointer; box-shadow:0 0 10px var(--accent-glow);">EXPORT</button>
+            </div>
         </footer>
+        <div id="scanProgress" style="display:none; background:var(--accent); color:white; font-size:0.6rem; text-align:center; padding:2px; font-weight:bold;">Taranıyor: <span id="progressCount">0/0</span></div>
     </div>
     <script src="popup.js"></script>
 </body>

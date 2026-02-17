@@ -91,12 +91,97 @@ chrome.webRequest.onHeadersReceived.addListener(
     ["responseHeaders"]
 );
 
+const detectedHeaders = {}; 
+const securityReports = {}; 
+const networkEndpoints = {}; 
+let fullScanData = { active: false, queue: [], visited: new Set(), results: { secrets: [], tech: [], endpoints: [], matches: [] }, tabId: null };
+
+// --- FULL SCAN MOTORU (BEAST MODE V2) ---
+async function startFullScan(tabId, startUrl) {
+    const url = new URL(startUrl);
+    const domain = url.hostname;
+    const baseDomain = domain.split('.').slice(-2).join('.');
+    
+    fullScanData = {
+        active: true,
+        queue: [startUrl],
+        visited: new Set(),
+        discoveredSubdomains: new Set([domain]),
+        results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] },
+        tabId: tabId,
+        baseDomain: baseDomain
+    };
+
+    // 1. ADIM: Gizli Yollari Bul (Robots.txt)
+    try {
+        const robots = await fetch(url.origin + "/robots.txt").then(r => r.text());
+        const disallowed = robots.match(/Disallow: \s*(\/[^\s#]+)/g);
+        if (disallowed) {
+            disallowed.forEach(p => {
+                const path = p.replace('Disallow:', '').trim();
+                if (path.length > 1) fullScanData.queue.push(url.origin + path);
+            });
+        }
+    } catch(e) {}
+    
+    processNextInQueue();
+}
+
+async function processNextInQueue() {
+    if (!fullScanData.active || fullScanData.queue.length === 0 || fullScanData.visited.size > 150) { // Max 150 sayfa
+        fullScanData.active = false;
+        chrome.runtime.sendMessage({ action: "FULL_SCAN_COMPLETE", data: fullScanData.results });
+        return;
+    }
+
+    const nextUrl = fullScanData.queue.shift();
+    if (fullScanData.visited.has(nextUrl)) return processNextInQueue();
+    
+    // Alt Alan Adi (Subdomain) Kesfi ve Otomatik Probe
+    try {
+        const u = new URL(nextUrl);
+        if (!fullScanData.discoveredSubdomains.has(u.hostname)) {
+            fullScanData.discoveredSubdomains.add(u.hostname);
+            // Yeni subdomain bulundu! Kritik dosyalari hemen yokla
+            const miniTargets = ['/.env', '/.git/config', '/backup.zip', '/.npmrc'];
+            miniTargets.forEach(t => fullScanData.queue.unshift(u.origin + t));
+        }
+    } catch(e) {}
+
+    fullScanData.visited.add(nextUrl);
+    chrome.tabs.update(fullScanData.tabId, { url: nextUrl });
+    chrome.runtime.sendMessage({ action: "FULL_SCAN_PROGRESS", current: fullScanData.visited.size, total: fullScanData.queue.length + fullScanData.visited.size });
+}
+
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    if (request.action === "START_FULL_SCAN") {
+        startFullScan(request.tabId, request.url);
+    }
+
     if (request.action === "SCAN_RESULTS") {
         const tabId = sender.tab.id;
-        let { secrets, tech, endpoints, candidates } = request.data;
+        let { secrets, tech, endpoints, candidates, links } = request.data;
         
-        // Ağ trafiğinden gelen gizli endpointleri ekle
+        // Full Scan Aktifse Verileri Birleştir
+        if (fullScanData.active && fullScanData.tabId === tabId) {
+            if (links) {
+                links.forEach(l => {
+                    try {
+                        const u = new URL(l);
+                        if (u.hostname.endsWith(fullScanData.baseDomain) && !fullScanData.visited.has(l)) {
+                            if (!fullScanData.queue.includes(l)) fullScanData.queue.push(l);
+                        }
+                    } catch(e) {}
+                });
+            }
+
+            fullScanData.results.secrets.push(...secrets);
+            fullScanData.results.tech.push(...tech);
+            fullScanData.results.endpoints.push(...endpoints);
+            // Bir sonraki sayfaya geç
+            setTimeout(processNextInQueue, 2000); // 2 saniye bekleme (WAF koruması)
+        }
+
         if (networkEndpoints[tabId]) {
             endpoints = Array.from(new Set([...endpoints, ...Array.from(networkEndpoints[tabId])]));
         }
@@ -172,19 +257,41 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             }
         } catch(e) {}
 
+        // TEKNOLOJİ EŞ ANLAMLI İSİMLERİ (NIST/CVE Eşleşmesi İçin)
+        const techAliases = {
+            'angular': ['angularjs', 'angular.js'],
+            'react': ['reactjs', 'react_native'],
+            'vue.js': ['vue', 'vuejs'],
+            'jquery': ['jquery.js'],
+            'bootstrap': ['bootstrap_framework'],
+            'nodejs': ['node.js'],
+            'wordpress': ['word_press'],
+            'drupal': ['drupal_cms'],
+            'magento': ['magento_commerce'],
+            'nginx': ['nginx_server'],
+            'apache': ['http_server']
+        };
+
         // PARALEL TARAMA (TURBO MODE)
-        const scanPromises = tech.map(async (t) => {
-            let fullName = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '');
-            if (!fullName || seen.has(fullName)) return null;
-            seen.add(fullName);
+        const scanPromises = tech.flatMap(t => {
+            let baseName = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '');
+            if (!baseName) return [];
             
-            const shard = await getShard(fullName);
-            if (shard && shard[fullName]) {
-                const v = t.version || "Unknown";
-                const found = shard[fullName].filter(item => isVulnerable(v, item.r));
-                if (found.length > 0) return { tech: t.name, version: v, exploits: found, source: t.source };
-            }
-            return null;
+            // Kontrol edilecek tüm isimleri belirle (Orijinal + Aliaslar)
+            const searchNames = [baseName, ...(techAliases[baseName] || [])];
+            
+            return searchNames.map(async (fullName) => {
+                if (seen.has(fullName)) return null;
+                seen.add(fullName);
+                
+                const shard = await getShard(fullName);
+                if (shard && shard[fullName]) {
+                    const v = t.version || "Unknown";
+                    const found = shard[fullName].filter(item => isVulnerable(v, item.r));
+                    if (found.length > 0) return { tech: t.name, version: v, exploits: found, source: t.source };
+                }
+                return null;
+            });
         });
 
         const results = await Promise.all(scanPromises);

@@ -85,34 +85,42 @@
             if (name) tech.push({ name, version: url.match(/(\d+\.\d+(\.\d+)?)/)?.[0] || "Unknown", source: "Script" });
         });
 
-        // 4. Saldırı Yüzeyi ve Aday İsimler
+        // 6. Endpoint & Saldırı Yüzeyi Keşfi
         const endpoints = new Set();
-        const candidates = new Set();
-        window.location.pathname.split('/').filter(p => p.length > 2 && !p.includes('.')).forEach(p => {
-            endpoints.add(p);
-            candidates.add(p);
-        });
-
+        const foundLinks = [];
         document.querySelectorAll('a, script, img, link').forEach(el => {
             const url = el.href || el.src;
             if (url && url.startsWith('http')) {
                 try {
                     const u = new URL(url);
                     if (u.hostname !== window.location.hostname) endpoints.add(u.hostname);
+                    foundLinks.push(url);
                 } catch(e) {}
             }
         });
 
+        // 6.5. Gizli Yol Madenciligi (Path Mining)
+        const paths = html.match(/["'](\/[a-z0-9_\-\.]{2,50})["']/gi);
+        if (paths) {
+            paths.forEach(p => {
+                const cleanPath = p.replace(/["']/g, '');
+                if (cleanPath.includes('.') && !cleanPath.match(/\.(js|css|png|jpg|svg|woff)/i)) {
+                    foundLinks.push(window.location.origin + cleanPath);
+                }
+            });
+        }
+
         // Unique & Send
         const unique = Array.from(new Set(secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
-        chrome.runtime.sendMessage({
+        chrome.runtime.sendMessage({ 
             action: "SCAN_RESULTS", 
-            data: {
+            data: { 
                 secrets: unique, 
                 tech, 
                 endpoints: Array.from(endpoints),
-                candidates: Array.from(candidates)
-            }
+                candidates: Array.from(candidateNames),
+                links: foundLinks // Kuyruga eklenecek linkler
+            } 
         });
     }
 
