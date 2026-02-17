@@ -51,33 +51,59 @@ function isVulnerable(v, rules) {
 // --- TRUE BACKGROUND SPIDER ---
 async function startFullScan(tabId, url) {
     const u = new URL(url);
-    CRAWLER = { active: true, tabId, domain: u.hostname, baseDomain: u.hostname.split('.').slice(-2).join('.'), queue: [url], visited: new Set(), secrets: [] };
+    CRAWLER = { 
+        active: true, 
+        tabId: tabId, 
+        domain: u.hostname, 
+        baseDomain: u.hostname.split('.').slice(-2).join('.'), 
+        queue: [url], 
+        visited: new Set(), 
+        secrets: [] 
+    };
     chrome.storage.local.set({ fullScanActive: true, scanProgress: 0 });
-    runSpider();
+    console.log("Full Scan Baslatildi: " + url);
+    runSpider(); // Motoru calistir
 }
 
 async function runSpider() {
     if(!CRAWLER.active || CRAWLER.queue.length === 0 || CRAWLER.visited.size >= 40) return finishScan();
+    
     const target = CRAWLER.queue.shift();
-    if(CRAWLER.visited.has(target)) return runSpider();
+    if(!target || CRAWLER.visited.has(target)) return runSpider();
+    
     CRAWLER.visited.add(target);
-    chrome.storage.local.set({ scanProgress: Math.round((CRAWLER.visited.size / 40) * 100) });
+    console.log("Taraniyor: " + target);
+    
+    // Progress Update
+    const prog = Math.round((CRAWLER.visited.size / 40) * 100);
+    chrome.storage.local.set({ scanProgress: prog });
 
     try {
-        const resp = await fetch(target);
-        const html = await resp.text();
-        for(let [type, reg] of Object.entries(patterns)) {
-            const matches = html.matchAll(reg);
-            for(const m of matches) CRAWLER.secrets.push({ type, value: m[0], url: target });
+        const resp = await fetch(target, { cache: 'no-store' });
+        if (resp.ok) {
+            const html = await resp.text();
+            // 1. Sızıntı Analizi
+            for(let [type, reg] of Object.entries(patterns)) {
+                const matches = html.matchAll(reg);
+                for(const m of matches) {
+                    CRAWLER.secrets.push({ type, value: m[0], url: target });
+                }
+            }
+            // 2. Link Toplama
+            const links = html.match(/href=["'](\/[^"'>\s]+|https?:\/\/[^"'>\s]+)["']/gi);
+            if(links) {
+                links.forEach(m => {
+                    let l = m.match(/["']([^"']+)["']/)[1];
+                    if(l.startsWith('/')) l = new URL(target).origin + l;
+                    if(l.includes(CRAWLER.baseDomain) && !CRAWLER.visited.has(l) && !CRAWLER.queue.includes(l)) {
+                        CRAWLER.queue.push(l);
+                    }
+                });
+            }
         }
-        const links = html.match(/href=["'](\/[^"'>\s]+|https?:\/\/[^"'>\s]+)["']/gi);
-        if(links) links.forEach(m => {
-            let l = m.match(/["']([^"']+)["']/)[1];
-            if(l.startsWith('/')) l = new URL(target).origin + l;
-            if(l.includes(CRAWLER.baseDomain) && !CRAWLER.visited.has(l)) CRAWLER.queue.push(l);
-        });
-    } catch(e) {}
-    setTimeout(runSpider, 600);
+    } catch(e) { console.error("Fetch hatasi:", e); }
+    
+    setTimeout(runSpider, 1000); // 1 saniye bekle ve devam et
 }
 
 function finishScan() {
@@ -99,6 +125,18 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
         const tabId = sender.tab.id;
         let { secrets, tech, endpoints } = req.data;
         
+        // --- VERİ MÜHÜRLEME (YÜZEY/ENDPOINTS) ---
+        if (!MASTER_DATA.has(tabId)) {
+            MASTER_DATA.set(tabId, { secrets: [], tech: [], matches: [], endpoints: new Set(), security: [] });
+        }
+        
+        const currentTab = MASTER_DATA.get(tabId);
+        
+        // Yeni endpointleri eskilerin üzerine ekle (Kaybetme!)
+        if (endpoints && Array.isArray(endpoints)) {
+            endpoints.forEach(e => currentTab.endpoints.add(e));
+        }
+
         (async () => {
             const matches = []; const seen = new Set();
             const scanTask = (tech || []).map(async t => {
@@ -114,10 +152,21 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
                 }
             });
             await Promise.all(scanTask);
-            const final = { secrets, tech, matches, endpoints, security: MASTER_DATA.get(tabId)?.security || [], time: Date.now() };
-            MASTER_DATA.set(tabId, final);
-            chrome.storage.local.set({ [`results_${tabId}`]: final });
-            chrome.runtime.sendMessage({ action: "UPDATE_UI", data: final });
+            
+            // Verileri Güncelle
+            currentTab.secrets = secrets || [];
+            currentTab.tech = tech || [];
+            currentTab.matches = matches;
+            currentTab.time = Date.now();
+
+            const finalForPopup = { 
+                ...currentTab, 
+                endpoints: Array.from(currentTab.endpoints) // Set'i diziye cevir
+            };
+
+            MASTER_DATA.set(tabId, currentTab);
+            chrome.storage.local.set({ [`results_${tabId}`]: finalForPopup });
+            chrome.runtime.sendMessage({ action: "UPDATE_UI", data: finalForPopup });
         })();
     }
 });

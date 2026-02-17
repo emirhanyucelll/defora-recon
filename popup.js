@@ -59,6 +59,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            chrome.runtime.sendMessage({ action: "GET_LIVE_DATA", tabId: tab.id }, (d) => {
+                if (!d) { alert("Veri hazır değil!"); return; }
+                const domain = new URL(tab.url).hostname;
+                const score = document.getElementById('securityScore')?.innerText || "--";
+                
+                const reportHTML = `
+                <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Audit - ${domain}</title>
+                <style>
+                    body { font-family: sans-serif; background: #f8fafc; padding: 50px; color: #1e293b; }
+                    .box { max-width: 900px; margin: auto; background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+                    h1 { margin: 0; color: #2563eb; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+                    .item { background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+                    code { background: #111; color: #10b981; padding: 8px; display: block; border-radius: 6px; word-break: break-all; margin-top: 5px; font-family: monospace; }
+                </style></head>
+                <body><div class="box">
+                    <h1>Defora Recon Audit</h1>
+                    <p>Hedef: <b>${domain}</b> | Skor: <b>${score}</b></p>
+                    <h2>🛡️ Zafiyetler</h2>
+                    ${(d.matches||[]).map(m => `<div class="item"><b>${m.tech} ${m.version}</b><br>${m.exploits.map(ex => ex.id).join(', ')}</div>`).join('') || 'Temiz.'}
+                    <h2>🔍 Sızıntılar</h2>
+                    ${(d.secrets||[]).map(s => `<div class="item"><b>${s.type}</b><code>${s.value}</code></div>`).join('') || 'Temiz.'}
+                </div></body></html>`;
+
+                const blob = new Blob([reportHTML], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url;
+                a.download = `RECON_${domain.replace(/\./g, '_')}.html`; a.click();
+            });
+        });
+    }
+
     // Progress Check
     setInterval(async () => {
         const res = await chrome.storage.local.get(['fullScanActive', 'scanProgress']);
