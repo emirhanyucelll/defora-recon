@@ -5,48 +5,38 @@ Web sitelerini analiz etmek, kullanılan teknolojileri tespit etmek ve olası g�
 
 ## 🇹🇷 Türkçe Açıklama
 
-### 🚀 Hızlı Başlangıç (Kullanıcılar İçin)
+### 🚀 Nasıl Kullanılır?
 Eklentiyi hemen kullanmaya başlamak için:
 1. Bu projeyi bilgisayarınıza indirin.
 2. Chrome tarayıcınızda `chrome://extensions/` adresine gidin.
 3. Sağ üstteki **Geliştirici Modu**'nu açın.
-4. **Paketlenmemiş öğe yükle** butonuna basarak bu klasörü seçin.
-*Hepsi bu kadar! Eklenti, güncel zafiyet verilerini otomatik olarak benim sunucumdan çekecektir.*
+4. **Paketlenmemiş öğe yükle** butonuna basarak indirdiğiniz klasörü seçin.
+*Eklenti, güncel zafiyet verilerini otomatik olarak benim hazırladığım ve her gün güncellenen veritabanından çekecektir.*
 
 ### 🛠️ Neler Yapıyor?
-- **Web Odaklı Analiz:** Sadece web teknolojilerini (kütüphane, sunucu, veritabanı vb.) tarar. Windows veya Android gibi gereksiz verilerle sizi yormaz.
-- **Anlık Tespit:** Sayfa yüklendiği an (0.5 saniyenin altında) teknolojileri ve CVE zafiyetlerini listeler.
+- **Web Odaklı Analiz:** Sadece web teknolojilerini (kütüphane, sunucu, veritabanı vb.) tarar. Windows veya Android gibi bu araçla alakası olmayan verileri ayıklayarak sistemi temiz tutuyorum.
+- **Anlık Tespit:** Sayfa yüklendiği an teknolojileri ve CVE zafiyetlerini yarım saniyenin altında bir sürede listeler.
 - **Sızıntı Avcısı:** Kaynak kodda unutulan gizli yorumları, API anahtarlarını ve veritabanı bağlantılarını bulur.
-- **Dinamik Keşif:** URL ve sayfa yapısına bakarak sızdırılmış olabilecek yedek dosyalarını (`.zip`, `.sql`, `.bak` vb.) otomatik arar.
+- **Dinamik Keşif:** URL ve sayfa yapısına bakarak sızdırılmış olabilecek yedek dosyalarını (`.zip`, `.sql`, `.bak` vb.) otomatik olarak arar.
 - **Saldırı Yüzeyi:** Sitenin dış bağlantılarını ve alt alan adlarını ayıklayarak bir harita çıkarır.
-
-### 👨‍💻 Geliştiriciler İçin (Kendi Veritabanını Kurmak İsteyenler)
-Eğer zafiyet veritabanını kendi sunucunuzda barındırmak isterseniz:
-1. PHP dosyalarını ve `shards/` klasörünü web sunucunuza yükleyin.
-2. `background.js` içindeki `BASE_URL` kısmını kendi adresinizle değiştirin.
-3. `daily_sync.php` dosyasını bir Cronjob'a bağlayarak verilerin güncel kalmasını sağlayın.
+- **Otomatik Güncelleme:** Arka planda çalışan sistemim sayesinde zafiyet veritabanını her gün NIST ve OSV üzerinden güncel tutuyorum.
 
 ---
 
 ## 🇺🇸 English Description
 
-### 🚀 Quick Start (For Users)
+### 🚀 How to Use?
 To use the extension immediately:
 1. Download this project to your computer.
 2. Go to `chrome://extensions/` in your Chrome browser.
 3. Enable **Developer Mode** in the top right.
-4. Click **Load unpacked** and select this folder.
-*That's it! The extension will automatically fetch the latest vulnerability data from my database.*
+4. Click **Load unpacked** and select the folder you just downloaded.
+*The extension will automatically fetch the latest vulnerability data from my database, which I keep updated daily.*
 
 ### 🛠️ Features
-- **Web-Focused:** Targets only web stack vulnerabilities, filtering out OS or hardware noise.
+- **Web-Focused:** I filter the data to target only web stack vulnerabilities, removing unnecessary OS or hardware noise.
 - **Fast Scanning:** Detects technologies and CVE matches in less than 0.5s.
 - **Secret Scraper:** Finds hidden developer comments, API keys, and DB credentials in the source code.
-- **Dynamic Probing:** Automatically guesses and checks for exposed backup files (`.zip`, `.sql`, `.bak`).
-- **Attack Surface:** Lists all external endpoints and subdomains.
-
-### 👨‍💻 For Developers (Self-Hosting)
-If you want to host the vulnerability data on your own server:
-1. Upload the PHP files and `shards/` folder to your server.
-2. Update the `BASE_URL` in `background.js` to point to your URL.
-3. Schedule `daily_sync.php` via Cronjob to keep the data fresh.
+- **Dynamic Probing:** Automatically identifies and checks for potentially exposed backup files (`.zip`, `.sql`, `.bak`).
+- **Attack Surface:** Lists all external endpoints and subdomains found on the page.
+- **Always Fresh:** My backend system keeps the vulnerability data synchronized daily with NIST and OSV sources.
