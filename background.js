@@ -165,110 +165,115 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
 
     if (request.action === "SCAN_RESULTS") {
-        const tabId = sender.tab.id;
-        let { secrets, tech, endpoints, candidates, links } = request.data;
-        
-        if (fullScanData.active && fullScanData.tabId === tabId) {
-            if (links) {
-                links.forEach(l => {
-                    try {
-                        const u = new URL(l);
-                        if (u.hostname.endsWith(fullScanData.baseDomain) && !fullScanData.visited.has(l)) {
-                            if (!fullScanData.queue.includes(l)) fullScanData.queue.push(l);
-                        }
-                    } catch(e) {}
-                });
-            }
-            fullScanData.results.secrets.push(...secrets);
-            fullScanData.results.tech.push(...tech);
-            fullScanData.results.endpoints.push(...endpoints);
-            setTimeout(processNextInQueue, 2000);
-        }
-
-        if (networkEndpoints[tabId]) {
-            endpoints = Array.from(new Set([...endpoints, ...Array.from(networkEndpoints[tabId])]));
-        }
-
-        const matches = []; const seen = new Set();
-        if (detectedHeaders[tabId]) tech = [...tech, ...detectedHeaders[tabId]];
-        const security = securityReports[tabId] || [];
-
         try {
-            const url = new URL(sender.tab.url);
-            const domain = url.hostname;
-            if (!globalThis.scannedDomains) globalThis.scannedDomains = new Set();
-            if (!globalThis.scannedDomains.has(domain)) {
-                globalThis.scannedDomains.add(domain);
-                (async () => {
-                    try {
-                        const honeyPot = await fetch(url.origin + "/defora_recon_hp_" + Math.random(), { method: 'HEAD' });
-                        if (honeyPot.status === 200) return;
-                    } catch(e) {}
-
-                    let targets = [
-                        { path: '/.env', check: 'APP_KEY=' },
-                        { path: '/.env.production', check: 'APP_KEY=' },
-                        { path: '/.git/config', check: '[core]' },
-                        { path: '/config.php.bak', check: '<?php' },
-                        { path: '/backup.zip', check: '' },
-                        { path: '/dump.sql', check: '' },
-                        { path: '/phpinfo.php', check: 'System' }
-                    ];
-
-                    const exts = ['.zip', '.sql', '.bak', '.tar.gz'];
-                    if (candidates) {
-                        candidates.forEach(c => { exts.forEach(ext => { targets.push({ path: `/${c}${ext}`, check: '' }); }); });
-                    }
-
-                    for (const t of targets) {
-                        try {
-                            await new Promise(r => setTimeout(r, 500 + Math.random() * 800));
-                            const resp = await fetch(url.origin + t.path, { method: 'HEAD', cache: 'no-store' });
-                            if (resp.status === 200) {
-                                const size = resp.headers.get('content-length');
-                                if (size === null || parseInt(size) > 100) {
-                                    chrome.storage.local.get([`results_${tabId}`], (curr) => {
-                                        let res = curr[`results_${tabId}`] || { secrets: [] };
-                                        if(!res.secrets) res.secrets = [];
-                                        const already = res.secrets.find(s => s.value === t.path + " bulundu!");
-                                        if (!already) {
-                                            res.secrets.push({ type: "KRİTİK DOSYA", value: t.path + " bulundu!", source: "Active Scan", url: url.origin + t.path });
-                                            chrome.action.setBadgeText({ text: "!", tabId: tabId });
-                                            chrome.action.setBadgeBackgroundColor({ color: "#ef4444", tabId: tabId });
-                                            chrome.storage.local.set({ [`results_${tabId}`]: res });
-                                        }
-                                    });
-                                }
-                            }
-                        } catch(err) { }
-                    }
-                })();
-            }
-        } catch(e) {}
-
-        // --- STABILIZED VULNERABILITY SCAN ---
-        for (const t of tech) {
-            let baseName = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '');
-            if (!baseName) continue;
+            const tabId = sender.tab.id;
+            let { secrets, tech, endpoints, candidates, links } = request.data;
             
-            const searchNames = [baseName, ...(techAliases[baseName] || [])];
-            for (const fullName of searchNames) {
-                if (seen.has(fullName)) continue;
-                seen.add(fullName);
-                
-                const shard = await getShard(fullName);
-                if (shard && shard[fullName]) {
-                    const v = t.version || "Unknown";
-                    const found = shard[fullName].filter(item => isVulnerable(v, item.r));
-                    if (found.length > 0) matches.push({ tech: t.name, version: v, exploits: found, source: t.source });
+            if (fullScanData.active && fullScanData.tabId === tabId) {
+                if (links) {
+                    links.forEach(l => {
+                        try {
+                            const u = new URL(l);
+                            if (u.hostname.endsWith(fullScanData.baseDomain) && !fullScanData.visited.has(l)) {
+                                if (!fullScanData.queue.includes(l)) fullScanData.queue.push(l);
+                            }
+                        } catch(e) {}
+                    });
+                }
+                fullScanData.results.secrets.push(...secrets);
+                fullScanData.results.tech.push(...tech);
+                fullScanData.results.endpoints.push(...endpoints);
+                setTimeout(processNextInQueue, 2000);
+            }
+
+            if (networkEndpoints[tabId]) {
+                endpoints = Array.from(new Set([...endpoints, ...Array.from(networkEndpoints[tabId])]));
+            }
+
+            const matches = []; const seen = new Set();
+            if (detectedHeaders[tabId]) tech = [...tech, ...detectedHeaders[tabId]];
+            const security = securityReports[tabId] || [];
+
+            try {
+                const url = new URL(sender.tab.url);
+                const domain = url.hostname;
+                if (!globalThis.scannedDomains) globalThis.scannedDomains = new Set();
+                if (!globalThis.scannedDomains.has(domain)) {
+                    globalThis.scannedDomains.add(domain);
+                    (async () => {
+                        try {
+                            const honeyPot = await fetch(url.origin + "/defora_recon_hp_" + Math.random(), { method: 'HEAD' });
+                            if (honeyPot.status === 200) return;
+                        } catch(e) {}
+
+                        let targets = [
+                            { path: '/.env', check: 'APP_KEY=' },
+                            { path: '/.env.production', check: 'APP_KEY=' },
+                            { path: '/.git/config', check: '[core]' },
+                            { path: '/config.php.bak', check: '<?php' },
+                            { path: '/backup.zip', check: '' },
+                            { path: '/dump.sql', check: '' },
+                            { path: '/phpinfo.php', check: 'System' }
+                        ];
+
+                        const exts = ['.zip', '.sql', '.bak', '.tar.gz'];
+                        // BURASI: Değişken adı 'candidates' olarak doğrulandı
+                        if (candidates && Array.isArray(candidates)) {
+                            candidates.forEach(c => { exts.forEach(ext => { targets.push({ path: `/${c}${ext}`, check: '' }); }); });
+                        }
+
+                        for (const t of targets) {
+                            try {
+                                await new Promise(r => setTimeout(r, 500 + Math.random() * 800));
+                                const resp = await fetch(url.origin + t.path, { method: 'HEAD', cache: 'no-store' });
+                                if (resp.status === 200) {
+                                    const size = resp.headers.get('content-length');
+                                    if (size === null || parseInt(size) > 100) {
+                                        chrome.storage.local.get([`results_${tabId}`], (curr) => {
+                                            let res = curr[`results_${tabId}`] || { secrets: [] };
+                                            if(!res.secrets) res.secrets = [];
+                                            const already = res.secrets.find(s => s.value === t.path + " bulundu!");
+                                            if (!already) {
+                                                res.secrets.push({ type: "KRİTİK DOSYA", value: t.path + " bulundu!", source: "Active Scan", url: url.origin + t.path });
+                                                chrome.action.setBadgeText({ text: "!", tabId: tabId });
+                                                chrome.action.setBadgeBackgroundColor({ color: "#ef4444", tabId: tabId });
+                                                chrome.storage.local.set({ [`results_${tabId}`]: res });
+                                            }
+                                        });
+                                    }
+                                }
+                            } catch(err) { }
+                        }
+                    })();
+                }
+            } catch(e) {}
+
+            // Zafiyet Taraması
+            for (const t of tech) {
+                let baseName = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '');
+                if (!baseName) continue;
+                const searchNames = [baseName, ...(techAliases[baseName] || [])];
+                for (const fullName of searchNames) {
+                    if (seen.has(fullName)) continue;
+                    seen.add(fullName);
+                    const shard = await getShard(fullName);
+                    if (shard && shard[fullName]) {
+                        const v = t.version || "Unknown";
+                        const found = shard[fullName].filter(item => isVulnerable(v, item.r));
+                        if (found.length > 0) matches.push({ tech: t.name, version: v, exploits: found, source: t.source });
+                    }
                 }
             }
-        }
 
-        chrome.storage.local.set({ [`results_${tabId}`]: { secrets, matches, tech, security, endpoints, time: Date.now() } });
-        if (secrets.length > 0 || matches.length > 0 || security.some(s => s.risk === 'HIGH')) {
-            chrome.action.setBadgeText({ text: "!", tabId: tabId });
-            chrome.action.setBadgeBackgroundColor({ color: "#ef4444", tabId: tabId });
+            // Sonuçları kaydet ve Popup'ı bilgilendir
+            chrome.storage.local.set({ [`results_${tabId}`]: { secrets, matches, tech, security, endpoints, time: Date.now() } });
+            
+            if (secrets.length > 0 || matches.length > 0 || security.some(s => s.risk === 'HIGH')) {
+                chrome.action.setBadgeText({ text: "!", tabId: tabId });
+                chrome.action.setBadgeBackgroundColor({ color: "#ef4444", tabId: tabId });
+            }
+        } catch (globalErr) {
+            console.error("Fatal Background Error:", globalErr);
         }
     }
 });
