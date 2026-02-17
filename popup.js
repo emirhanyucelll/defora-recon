@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 div.innerHTML = `
                     <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                         <span class="secret-label" style="background:${color}22; color:${color}; border:1px solid ${color}44;">${s.type}</span>
-                        ${s.url ? `<span style="font-size:0.55rem; color:var(--accent); opacity:0.7;">📍 ${new URL(s.url).pathname}</span>` : ''}
+                        ${s.url ? `<span style="font-size:0.55rem; color:var(--accent); opacity:0.9; font-weight:bold;">📍 ${s.url.replace(/https?:\/\/[^\/]+/, '') || '/'}</span>` : ''}
                     </div>
                     <div class="secret-content" style="color:#eee; font-weight:bold; word-break: break-all;">${s.value}</div>
                 `;
@@ -134,89 +134,114 @@ document.addEventListener('DOMContentLoaded', async () => {
         exportBtn.addEventListener('click', () => {
             if (!data) return;
             const domain = new URL(tab.url).hostname;
+            const score = document.getElementById('securityScore').innerText;
             
-            // HTML yapısını önceden hazırla (Template Literal karmaşasını önlemek için)
             const vulnHTML = (data.matches || []).map(m => `
-                <div class="item">
-                    <div style="font-weight:bold; color:#111; margin-bottom:5px;">${m.tech} ${m.version}</div>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap;">
-                        ${m.exploits.map(ex => `<span style="background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-size:0.8rem; font-weight:bold; border:1px solid #ef4444;">${ex.id}</span>`).join('')}
+                <div class="report-card">
+                    <div class="report-card-title">${m.tech} <small>${m.version}</small></div>
+                    <div class="tag-container">
+                        ${m.exploits.map(ex => `<span class="badge badge-danger">${ex.id}</span>`).join('')}
                     </div>
-                    <div style="font-size:0.8rem; color:#666; margin-top:5px;">Kaynak: ${m.source}</div>
                 </div>
             `).join('');
 
+            const secretHTML = (data.secrets || []).map(s => `
+                <div class="report-card">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <span class="badge badge-warning">${s.type}</span>
+                        <span style="font-size:0.7rem; color:#888;">📍 ${s.url ? new URL(s.url).pathname : '/'}</span>
+                    </div>
+                    <div style="font-family:monospace; background:#1a1a1a; color:#0f0; padding:8px; border-radius:4px; margin-top:8px; word-break:break-all; font-size:0.85rem; border:1px solid #333;">${s.value}</div>
+                </div>
+            `).join('');
+
+            const endpointHTML = (data.endpoints || []).map(e => `<div class="endpoint-item">🔗 ${e}</div>`).join('');
+
             const reportHTML = `
             <!DOCTYPE html>
-            <html>
+            <html lang="tr">
             <head>
                 <meta charset="UTF-8">
-                <title>RECON REPORT - ${domain}</title>
+                <title>Recon Report - ${domain}</title>
                 <style>
-                    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; color: #333; padding: 40px; line-height: 1.6; }
-                    .report-header { border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-                    h1 { color: #111; margin: 0; font-size: 2rem; }
-                    .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
-                    h2 { border-left: 5px solid #2563eb; padding-left: 15px; font-size: 1.4rem; color: #2563eb; margin-top: 0; }
-                    .item { padding: 15px; border-bottom: 1px solid #eee; }
-                    .item:last-child { border-bottom: none; }
-                    .risk-HIGH { color: #ef4444; font-weight: bold; }
-                    .risk-MEDIUM { color: #f59e0b; font-weight: bold; }
-                    .label { font-size: 0.75rem; background: #e5e7eb; padding: 3px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
-                    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', monospace; color: #e11d48; }
-                    .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-                    .tech-item { background: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; }
+                    :root { --bg: #0a0a0a; --card: #141414; --text: #e0e0e0; --accent: #2563eb; --danger: #ef4444; --warning: #f59e0b; }
+                    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; margin: 0; padding: 40px; }
+                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+                    h1 { margin: 0; font-size: 1.5rem; letter-spacing: -0.5px; }
+                    .score-box { text-align: right; }
+                    .score-val { font-size: 2rem; font-weight: 900; color: var(--accent); }
+                    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
+                    .section { margin-bottom: 40px; }
+                    h2 { font-size: 1rem; text-transform: uppercase; color: #888; border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 20px; }
+                    .report-card { background: var(--card); border: 1px solid #222; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+                    .report-card-title { font-weight: 700; margin-bottom: 10px; }
+                    .badge { font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+                    .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+                    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+                    .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+                    .tech-item { background: var(--card); border: 1px solid #222; padding: 10px; border-radius: 6px; font-size: 0.85rem; }
+                    .endpoint-list { background: var(--card); border: 1px solid #222; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+                    .endpoint-item { color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+                    footer { margin-top: 60px; border-top: 1px solid #333; padding-top: 20px; text-align: center; color: #555; font-size: 0.8rem; }
                 </style>
             </head>
             <body>
-                <div class="report-header">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h1>DEFORA RECON | İstihbarat Raporu</h1>
-                        <div style="text-align:right">
-                            <div style="font-weight:bold; font-size:1.2rem; color:#2563eb;">GÜVENLİK PUANI: ${document.getElementById('securityScore').innerText}</div>
-                            <div style="font-size:0.8rem; color:#666;">${new Date().toLocaleString()}</div>
-                        </div>
+                <div class="header">
+                    <div>
+                        <h1>Defora Recon | Analiz Raporu</h1>
+                        <div style="color:#666; font-size:0.9rem;">Hedef: <strong>${domain}</strong></div>
                     </div>
-                    <p style="margin-top:15px; color:#444;">Hedef Alan Adı: <strong>${domain}</strong></p>
+                    <div class="score-box">
+                        <div style="font-size:0.7rem; color:#888;">GÜVENLİK PUANI</div>
+                        <div class="score-val">${score}</div>
+                        <div style="font-size:0.7rem; color:#555;">${new Date().toLocaleString()}</div>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="section">
+                        <h2>Zafiyet Taraması (CVE/GHSA)</h2>
+                        ${vulnHTML || '<div class="report-card" style="color:#10b981;">✓ Bilinen zafiyet bulunamadı.</div>'}
+                    </div>
+                    <div class="section">
+                        <h2>Veri Sızıntıları & Bulgular</h2>
+                        ${secretHTML || '<div class="report-card" style="color:#10b981;">✓ Hassas veri sızıntısı tespit edilmedi.</div>'}
+                    </div>
                 </div>
 
                 <div class="section">
-                    <h2>1. Güvenlik Denetimi (Headers)</h2>
-                    ${(data.security || []).map(s => `<div class="item"><span class="risk-${s.risk}">[${s.risk}]</span> <strong>${s.name}</strong>: ${s.desc}</div>`).join('') || '<p style="color:#10b981; padding:15px;">✓ Kritik yapılandırma hatası tespit edilmedi.</p>'}
+                    <h2>Saldırı Yüzeyi (Endpoints)</h2>
+                    <div class="endpoint-list">
+                        ${endpointHTML || '<div style="color:#555;">Bağlantı bulunamadı.</div>'}
+                    </div>
                 </div>
 
                 <div class="section">
-                    <h2>2. Bilinen Zafiyetler (CVE)</h2>
-                    ${vulnHTML || '<p style="color:#10b981; padding:15px;">✓ Bilinen bir zafiyetli kütüphane tespit edilmedi.</p>'}
-                </div>
-
-                <div class="section">
-                    <h2>3. Kritik Veri Sızıntıları</h2>
-                    ${(data.secrets || []).map(s => `
-                        <div class="item">
-                            <span class="label">${s.type}</span> <code>${s.value}</code>
-                            <div style="font-size:0.75rem; color:#888; margin-top:5px;">Konum: ${s.source}</div>
-                        </div>
-                    `).join('') || '<p style="color:#10b981; padding:15px;">✓ Herhangi bir API anahtarı veya parola sızıntısı bulunamadı.</p>'}
-                </div>
-
-                <div class="section">
-                    <h2>4. Teknoloji Envanteri</h2>
+                    <h2>Teknoloji Envanteri</h2>
                     <div class="tech-grid">
                         ${(data.tech || []).map(t => `
                             <div class="tech-item">
-                                <strong>${t.name}</strong><br>
-                                <span style="color:#64748b; font-size:0.8rem;">Sürüm: ${t.version}</span>
+                                <div style="font-weight:bold;">${t.name}</div>
+                                <div style="color:#666; font-size:0.75rem;">Sürüm: ${t.version}</div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
-                
-                <footer style="margin-top:50px; text-align:center; font-size:0.8rem; color:#94a3b8; border-top:1px solid #e2e8f0; padding-top:20px;">
-                    Bu rapor <strong>Defora Recon Engine</strong> tarafından üretilmiştir. Gizli belgedir.
+
+                <footer>
+                    Bu rapor Defora Recon tarafından otomatik oluşturulmuştur.
                 </footer>
             </body>
             </html>`;
+
+            const blob = new Blob([reportHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `RECON_REPORT_${domain.replace(/\./g, '_')}.html`;
+            a.click();
+        });
+    }
 
             const blob = new Blob([reportHTML], { type: 'text/html' });
             const url = URL.createObjectURL(blob);

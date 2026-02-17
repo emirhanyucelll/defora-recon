@@ -153,7 +153,12 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                                         if(!res.secrets) res.secrets = [];
                                         const already = res.secrets.find(s => s.value === t.path + " bulundu!");
                                         if (!already) {
-                                            res.secrets.push({ type: "KRİTİK DOSYA", value: t.path + " bulundu!", source: "Active Scan" });
+                                            res.secrets.push({ 
+                                                type: "KRİTİK DOSYA", 
+                                                value: t.path + " bulundu!", 
+                                                source: "Active Scan",
+                                                url: url.origin + t.path // Tam URL eklendi
+                                            });
                                             chrome.action.setBadgeText({ text: "!", tabId: tabId });
                                             chrome.action.setBadgeBackgroundColor({ color: "#ef4444", tabId: tabId });
                                             chrome.storage.local.set({ [`results_${tabId}`]: res });
