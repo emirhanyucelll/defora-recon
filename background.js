@@ -1,4 +1,4 @@
-// DEFORA RECON - THE BRAIN (V71 - STABLE & SYNCED)
+// DEFORA RECON - THE BRAIN (V73 - SILENT SPIDER & PRO REPORT)
 const BASE_URL = "https://emirhanyucelll.github.io/defora-recon/shards/";
 let SHARD_CACHE = {};
 
@@ -15,11 +15,11 @@ const patterns = {
     "Cloud: Google": /AIza[0-9A-Za-z\-_]{20,50}/g,
     "Token: GitHub": /ghp_[a-zA-Z0-9]{30,50}/g,
     "Token: Twilio SID": /\bAC[0-9a-fA-F]{32}\b/g,
-    "ID: UUID": /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/g,
-    "Bağlantı: DB Link": /(?:postgres(?:ql)?|mongodb(?:\+srv)?|mysql|redis):\/\/[a-z0-9._-]+\:[a-z0-9._-]+\@[a-z0-9.-]+/gi,
-    "Dosya: Hassas": /[a-z0-9_\-\.]+\.(?:env|conf|bak|sql|ini|log|yaml|sh|old|zip|tar\.gz)/gi
+    "Token: JWT": /\beyJ[a-zA-Z0-9._-]{50,500}\b/g,
+    "Bağlantı: DB Link": /(?:postgres(?:ql)?|mongodb(?:\+srv)?|mysql|redis):\/\/[a-z0-9._-]+\:[a-z0-9._-]+\@[a-z0-9.-]+/gi
 };
 
+// --- YARDIMCI FONKSIYONLAR ---
 async function getShard(name) {
     let prefix = name.substring(0, 2).toLowerCase();
     if (prefix.length < 2) prefix += '_';
@@ -53,105 +53,95 @@ function isVulnerable(detected, rules) {
     return false;
 }
 
-const securityReports = {}; 
-const detectedHeaders = {};
-const networkEndpoints = {}; 
-let fullScanData = { active: false, queue: [], visited: new Set(), results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] }, tabId: null };
+// --- SILENT FULL SCAN ENGINE ---
+let scanStatus = { active: false, queue: [], visited: new Set(), results: { secrets: [], matches: [] }, domain: "" };
 
 async function startFullScan(tabId, startUrl) {
     const url = new URL(startUrl);
-    fullScanData = {
+    scanStatus = {
         active: true, queue: [startUrl], visited: new Set(),
-        results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] },
-        tabId: tabId, domain: url.hostname, baseDomain: url.hostname.split('.').slice(-2).join('.')
+        results: { secrets: [], matches: [] },
+        domain: url.hostname, baseDomain: url.hostname.split('.').slice(-2).join('.')
     };
     chrome.storage.local.set({ fullScanActive: true, scanProgress: 0 });
-    processNextInQueue();
+    runSilentSpider();
 }
 
-async function processNextInQueue() {
-    if (!fullScanData.active || fullScanData.queue.length === 0 || fullScanData.visited.size > 50) {
-        finishFullScan(); return;
+async function runSilentSpider() {
+    if (!scanStatus.active || scanStatus.queue.length === 0 || scanStatus.visited.size > 100) {
+        finishScan(); return;
     }
-    const nextUrl = fullScanData.queue.shift();
-    if (fullScanData.visited.has(nextUrl)) return processNextInQueue();
-    fullScanData.visited.add(nextUrl);
-    chrome.storage.local.set({ scanProgress: Math.round((fullScanData.visited.size / 50) * 100) });
-    chrome.tabs.update(fullScanData.tabId, { url: nextUrl });
-    setTimeout(processNextInQueue, 2500); 
+
+    const currentUrl = scanStatus.queue.shift();
+    if (scanStatus.visited.has(currentUrl)) return runSilentSpider();
+    scanStatus.visited.add(currentUrl);
+
+    // Progress Update
+    const progress = Math.round((scanStatus.visited.size / (scanStatus.queue.length + scanStatus.visited.size)) * 100);
+    chrome.storage.local.set({ scanProgress: progress });
+
+    try {
+        const resp = await fetch(currentUrl);
+        const html = await resp.text();
+
+        // 1. Sızıntı Analizi
+        for (let [type, regex] of Object.entries(patterns)) {
+            const matches = html.matchAll(regex);
+            for (const m of matches) {
+                scanStatus.results.secrets.push({ type, value: m[0], url: currentUrl });
+            }
+        }
+
+        // 2. Link Toplama (Kuyruğa ekle)
+        const links = html.match(/href=["'](\/[^"'>\s]+|https?:\/\/[^"'>\s]+)["']/gi);
+        if (links) {
+            links.forEach(m => {
+                let l = m.match(/["']([^"']+)["']/)[1];
+                if (l.startsWith('/')) l = new URL(currentUrl).origin + l;
+                if (l.includes(scanStatus.baseDomain) && !scanStatus.visited.has(l)) scanStatus.queue.push(l);
+            });
+        }
+    } catch(e) {}
+
+    setTimeout(runSilentSpider, 500); // 0.5 saniye bekle (Hızlı tarama)
 }
 
-function finishFullScan() {
-    fullScanData.active = false;
+function finishScan() {
+    scanStatus.active = false;
     chrome.storage.local.set({ fullScanActive: false });
-    chrome.runtime.sendMessage({ action: "UPDATE_UI", data: fullScanData.results });
-    chrome.runtime.sendMessage({ action: "FULL_SCAN_COMPLETE", data: fullScanData.results });
+    chrome.runtime.sendMessage({ action: "FULL_SCAN_COMPLETE", data: scanStatus.results });
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender) => {
-    if (request.action === "START_FULL_SCAN") startFullScan(request.tabId, request.url);
+    if (request.action === "START_FULL_SCAN") startFullScan(sender.tab.id, request.url);
     if (request.action === "SCAN_RESULTS") {
         try {
             const tabId = sender.tab.id;
             let { secrets, tech, endpoints } = request.data;
-            if (detectedHeaders[tabId]) tech = [...tech, ...detectedHeaders[tabId]];
             
-            tech = (tech || []).map(t => {
-                if(!t.name) return t;
+            // Teknoloji ve Zafiyet Analizi (Single Page - Turbo)
+            const matches = []; const seenTech = new Set();
+            tech = tech.map(t => {
                 let clean = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '').trim();
                 return { ...t, name: clean };
-            }).filter(t => t && t.name);
+            });
 
-            const matches = []; const seenTech = new Set();
             for (const t of tech) {
                 if (seenTech.has(t.name)) continue;
                 seenTech.add(t.name);
                 const searchNames = [t.name, ...(techAliases[t.name] || [])];
-                let allExploits = [];
-                for (const fullName of searchNames) {
-                    const shard = await getShard(fullName);
-                    if (shard && shard[fullName]) {
-                        allExploits.push(...shard[fullName].filter(item => isVulnerable(t.version, item.r)));
+                for (const name of searchNames) {
+                    const shard = await getShard(name);
+                    if (shard && shard[name]) {
+                        const found = shard[name].filter(item => isVulnerable(t.version, item.r));
+                        if(found.length > 0) matches.push({ tech: t.name, version: t.version, exploits: found });
                     }
                 }
-                if (allExploits.length > 0) {
-                    const unique = Array.from(new Map(allExploits.map(item => [item.id, item])).values());
-                    matches.push({ tech: t.name, version: t.version || "Unknown", exploits: unique });
-                }
             }
 
-            const res = { secrets: secrets || [], matches, tech, security: securityReports[tabId] || [], endpoints: endpoints || [], time: Date.now() };
-            
-            if (fullScanData.active && fullScanData.tabId === tabId) {
-                fullScanData.results.secrets.push(...res.secrets);
-                fullScanData.results.tech.push(...res.tech);
-                fullScanData.results.endpoints.push(...res.endpoints);
-                fullScanData.results.matches.push(...res.matches);
-            }
-
-            chrome.storage.local.set({ [`results_${tabId}`]: res });
-            chrome.runtime.sendMessage({ action: "UPDATE_UI", data: res }); // POPUP'I UYAR!
-        } catch(e) { console.error(e); }
+            const currentRes = { secrets, matches, tech, endpoints, time: Date.now() };
+            chrome.storage.local.set({ [`results_${tabId}`]: currentRes });
+            chrome.runtime.sendMessage({ action: "UPDATE_UI", data: currentRes });
+        } catch(e) {}
     }
 });
-
-chrome.webRequest.onHeadersReceived.addListener((details) => {
-    if (details.type !== 'main_frame') return;
-    const tabId = details.tabId;
-    const headers = details.responseHeaders;
-    const security = [];
-    const hNames = headers.map(h => h.name.toLowerCase());
-    if (!hNames.includes('strict-transport-security')) security.push({ risk: 'MEDIUM', name: 'HSTS Eksik', desc: 'HTTPS zorlanmiyor.' });
-    if (!hNames.includes('content-security-policy')) security.push({ risk: 'MEDIUM', name: 'CSP Eksik', desc: 'XSS riski yuksek.' });
-    if (!hNames.includes('x-frame-options')) security.push({ risk: 'HIGH', name: 'Clickjacking', desc: 'Site frame icine alinabilir.' });
-    
-    headers.forEach(h => {
-        const name = h.name.toLowerCase();
-        if (['server', 'x-powered-by'].includes(name)) {
-            const parts = h.value.split(/[\/\s]/);
-            if(!detectedHeaders[tabId]) detectedHeaders[tabId] = [];
-            detectedHeaders[tabId].push({ name: parts[0], version: parts[1] || 'Unknown', source: `Header` });
-        }
-    });
-    securityReports[tabId] = security;
-}, { urls: ["<all_urls>"] }, ["responseHeaders"]);
