@@ -1,4 +1,4 @@
-// DEFORA RECON - THE BRAIN (V70 - TRUE STEALTH ANALYZER)
+// DEFORA RECON - THE BRAIN (V71 - STABLE & SYNCED)
 const BASE_URL = "https://emirhanyucelll.github.io/defora-recon/shards/";
 let SHARD_CACHE = {};
 
@@ -10,7 +10,6 @@ const techAliases = {
     'bootstrap': ['bootstrap_framework']
 };
 
-// Sızıntı Patternları (Arka plan analizi için kopyalandı)
 const patterns = {
     "Cloud: AWS": /AKIA[0-9A-Z]{16}/g,
     "Cloud: Google": /AIza[0-9A-Za-z\-_]{20,50}/g,
@@ -21,7 +20,6 @@ const patterns = {
     "Dosya: Hassas": /[a-z0-9_\-\.]+\.(?:env|conf|bak|sql|ini|log|yaml|sh|old|zip|tar\.gz)/gi
 };
 
-// --- YARDIMCI FONKSİYONLAR ---
 async function getShard(name) {
     let prefix = name.substring(0, 2).toLowerCase();
     if (prefix.length < 2) prefix += '_';
@@ -55,8 +53,10 @@ function isVulnerable(detected, rules) {
     return false;
 }
 
-// --- FULL SCAN MOTORU (STEALTH & DEEP ANALYZER) ---
-let fullScanData = { active: false, queue: [], visited: new Set(), results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] }, tabId: null, domain: "" };
+const securityReports = {}; 
+const detectedHeaders = {};
+const networkEndpoints = {}; 
+let fullScanData = { active: false, queue: [], visited: new Set(), results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] }, tabId: null };
 
 async function startFullScan(tabId, startUrl) {
     const url = new URL(startUrl);
@@ -71,56 +71,21 @@ async function startFullScan(tabId, startUrl) {
 
 async function processNextInQueue() {
     if (!fullScanData.active || fullScanData.queue.length === 0 || fullScanData.visited.size > 50) {
-        finishFullScan();
-        return;
+        finishFullScan(); return;
     }
-
     const nextUrl = fullScanData.queue.shift();
     if (fullScanData.visited.has(nextUrl)) return processNextInQueue();
     fullScanData.visited.add(nextUrl);
-
-    const progress = Math.round((fullScanData.visited.size / (fullScanData.queue.length + fullScanData.visited.size)) * 100);
-    chrome.storage.local.set({ scanProgress: progress });
-
-    try {
-        const resp = await fetch(nextUrl);
-        const html = await resp.text();
-        
-        // 1. Arka Planda Sızıntı Analizi
-        for (let [type, regex] of Object.entries(patterns)) {
-            const matches = html.matchAll(regex);
-            for (const m of matches) {
-                fullScanData.results.secrets.push({ type, value: m[0], url: nextUrl });
-            }
-        }
-
-        // 2. Link Madenciliği
-        const links = html.match(/href=["'](\/[^"'>\s]+|https?:\/\/[^"'>\s]+)["']/gi);
-        if (links) {
-            links.forEach(m => {
-                let l = m.match(/["']([^"']+)["']/)[1];
-                if (l.startsWith('/')) l = new URL(nextUrl).origin + l;
-                if (l.includes(fullScanData.baseDomain) && !fullScanData.visited.has(l)) {
-                    if (!fullScanData.queue.includes(l)) fullScanData.queue.push(l);
-                }
-            });
-        }
-    } catch(e) {}
-
-    setTimeout(processNextInQueue, 1500);
+    chrome.storage.local.set({ scanProgress: Math.round((fullScanData.visited.size / 50) * 100) });
+    chrome.tabs.update(fullScanData.tabId, { url: nextUrl });
+    setTimeout(processNextInQueue, 2500); 
 }
 
 function finishFullScan() {
     fullScanData.active = false;
     chrome.storage.local.set({ fullScanActive: false });
-    // Verileri temizle (Duplicate'leri sil)
-    const d = fullScanData.results;
-    d.secrets = Array.from(new Set(d.secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
-    d.tech = Array.from(new Set(d.tech.map(t => JSON.stringify(t)))).map(t => JSON.parse(t));
-    d.endpoints = Array.from(new Set(d.endpoints));
-    
-    chrome.storage.local.set({ [`results_${fullScanData.tabId}`]: d });
-    chrome.runtime.sendMessage({ action: "FULL_SCAN_COMPLETE", data: d });
+    chrome.runtime.sendMessage({ action: "UPDATE_UI", data: fullScanData.results });
+    chrome.runtime.sendMessage({ action: "FULL_SCAN_COMPLETE", data: fullScanData.results });
 }
 
 chrome.runtime.onMessage.addListener(async (request, sender) => {
@@ -129,11 +94,13 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
         try {
             const tabId = sender.tab.id;
             let { secrets, tech, endpoints } = request.data;
+            if (detectedHeaders[tabId]) tech = [...tech, ...detectedHeaders[tabId]];
             
-            tech = tech.map(t => {
+            tech = (tech || []).map(t => {
+                if(!t.name) return t;
                 let clean = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '').trim();
                 return { ...t, name: clean };
-            }).filter(t => t.name);
+            }).filter(t => t && t.name);
 
             const matches = []; const seenTech = new Set();
             for (const t of tech) {
@@ -153,10 +120,18 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
                 }
             }
 
-            const currentSecurity = securityReports[tabId] || [];
-            const currentRes = { secrets, matches, tech, security: currentSecurity, endpoints, time: Date.now() };
-            chrome.storage.local.set({ [`results_${tabId}`]: currentRes });
-        } catch(e) {}
+            const res = { secrets: secrets || [], matches, tech, security: securityReports[tabId] || [], endpoints: endpoints || [], time: Date.now() };
+            
+            if (fullScanData.active && fullScanData.tabId === tabId) {
+                fullScanData.results.secrets.push(...res.secrets);
+                fullScanData.results.tech.push(...res.tech);
+                fullScanData.results.endpoints.push(...res.endpoints);
+                fullScanData.results.matches.push(...res.matches);
+            }
+
+            chrome.storage.local.set({ [`results_${tabId}`]: res });
+            chrome.runtime.sendMessage({ action: "UPDATE_UI", data: res }); // POPUP'I UYAR!
+        } catch(e) { console.error(e); }
     }
 });
 
@@ -166,10 +141,17 @@ chrome.webRequest.onHeadersReceived.addListener((details) => {
     const headers = details.responseHeaders;
     const security = [];
     const hNames = headers.map(h => h.name.toLowerCase());
-    
     if (!hNames.includes('strict-transport-security')) security.push({ risk: 'MEDIUM', name: 'HSTS Eksik', desc: 'HTTPS zorlanmiyor.' });
     if (!hNames.includes('content-security-policy')) security.push({ risk: 'MEDIUM', name: 'CSP Eksik', desc: 'XSS riski yuksek.' });
     if (!hNames.includes('x-frame-options')) security.push({ risk: 'HIGH', name: 'Clickjacking', desc: 'Site frame icine alinabilir.' });
     
+    headers.forEach(h => {
+        const name = h.name.toLowerCase();
+        if (['server', 'x-powered-by'].includes(name)) {
+            const parts = h.value.split(/[\/\s]/);
+            if(!detectedHeaders[tabId]) detectedHeaders[tabId] = [];
+            detectedHeaders[tabId].push({ name: parts[0], version: parts[1] || 'Unknown', source: `Header` });
+        }
+    });
     securityReports[tabId] = security;
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
