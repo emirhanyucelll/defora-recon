@@ -168,14 +168,16 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
             
             // ISIM VE VERSION TEMIZLEME
             tech = tech.map(t => {
+                if(!t.name) return t;
                 let clean = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '').trim();
                 return { ...t, name: clean };
-            });
+            }).filter(t => t.name);
 
             const matches = []; const seenTech = new Set();
             for (const t of tech) {
-                if (!t.name || seenTech.has(t.name)) continue;
+                if (seenTech.has(t.name)) continue;
                 seenTech.add(t.name);
+                
                 const searchNames = [t.name, ...(techAliases[t.name] || [])];
                 let allExploits = [];
                 for (const fullName of searchNames) {
@@ -187,7 +189,7 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
                 }
                 if (allExploits.length > 0) {
                     const unique = Array.from(new Map(allExploits.map(item => [item.id, item])).values());
-                    matches.push({ tech: t.name, version: t.version, exploits: unique });
+                    matches.push({ tech: t.name, version: t.version || "Unknown", exploits: unique });
                 }
             }
             chrome.storage.local.set({ [`results_${tabId}`]: { secrets, matches, tech, endpoints, time: Date.now() } });
