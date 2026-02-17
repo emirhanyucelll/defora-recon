@@ -1,42 +1,52 @@
 # Defora Recon
-Web sitelerini analiz etmek, kullanılan teknolojileri tespit etmek ve olası güvenlik açıklarını/sızıntıları bulmak için geliştirdiğim bir araç.
+Web sitelerini analiz etmek, kullanılan teknolojileri tespit etmek ve olası güvenlik açıklarını/sızıntıları bulmak için hazırladığım bir araç.
 
 ---
 
 ## 🇹🇷 Türkçe Açıklama
 
-### Neler Yapıyor?
-- **Web Odaklı Filtreleme:** NIST veritabanındaki zafiyetleri tararken sadece web sitelerini ilgilendiren (kütüphane, sunucu, veritabanı vb.) verileri alır. Windows, Android veya donanım gibi web dışı içerikleri ayıklayarak veritabanını sade ve amaca yönelik tutar.
-- **Hızlı Tarama:** Sayfa yüklendiği an kullanılan teknolojileri ve bunlarla eşleşen bilinen zafiyetleri (CVE) yarım saniyenin altında bir sürede gösterir.
-- **Hassas Veri Taraması:** Kaynak kod içindeki geliştirici yorumlarını, API anahtarlarını (AWS, Azure, Firebase, JWT), veritabanı bağlantılarını ve sızdırılmış olabilecek dosya isimlerini tespit eder.
-- **Bağlantı Keşfi:** Sayfadaki tüm dış bağlantıları ve alt alan adlarını (subdomain) listeleyerek sitenin genel haritasını çıkarır.
-- **Aktif Dosya Kontrolü:** Arka planda `.env`, `.git/config`, `backup.zip`, `sql` yedekleri gibi 30'dan fazla kritik noktayı otomatik olarak kontrol eder.
-- **Güncel Veri:** GitHub Actions ve NIST API 2.0 entegrasyonu sayesinde zafiyet listesini her gün otomatik olarak günceller.
+### 🚀 Hızlı Başlangıç (Kullanıcılar İçin)
+Eklentiyi hemen kullanmaya başlamak için:
+1. Bu projeyi bilgisayarınıza indirin.
+2. Chrome tarayıcınızda `chrome://extensions/` adresine gidin.
+3. Sağ üstteki **Geliştirici Modu**'nu açın.
+4. **Paketlenmemiş öğe yükle** butonuna basarak bu klasörü seçin.
+*Hepsi bu kadar! Eklenti, güncel zafiyet verilerini otomatik olarak benim sunucumdan çekecektir.*
 
-### Kurulum
-1. `shards/` klasörünü ve PHP dosyalarını web sunucunuza aktarın.
-2. Eklentiyi Chrome'da "Geliştirici Modu" üzerinden "Paketlenmemiş öğe yükle" diyerek seçin.
-3. Güncellemelerin daha hızlı çalışması için GitHub Secrets kısmına `NVD_API_KEY` ekleyebilirsiniz.
+### 🛠️ Neler Yapıyor?
+- **Web Odaklı Analiz:** Sadece web teknolojilerini (kütüphane, sunucu, veritabanı vb.) tarar. Windows veya Android gibi gereksiz verilerle sizi yormaz.
+- **Anlık Tespit:** Sayfa yüklendiği an (0.5 saniyenin altında) teknolojileri ve CVE zafiyetlerini listeler.
+- **Sızıntı Avcısı:** Kaynak kodda unutulan gizli yorumları, API anahtarlarını ve veritabanı bağlantılarını bulur.
+- **Dinamik Keşif:** URL ve sayfa yapısına bakarak sızdırılmış olabilecek yedek dosyalarını (`.zip`, `.sql`, `.bak` vb.) otomatik arar.
+- **Saldırı Yüzeyi:** Sitenin dış bağlantılarını ve alt alan adlarını ayıklayarak bir harita çıkarır.
+
+### 👨‍💻 Geliştiriciler İçin (Kendi Veritabanını Kurmak İsteyenler)
+Eğer zafiyet veritabanını kendi sunucunuzda barındırmak isterseniz:
+1. PHP dosyalarını ve `shards/` klasörünü web sunucunuza yükleyin.
+2. `background.js` içindeki `BASE_URL` kısmını kendi adresinizle değiştirin.
+3. `daily_sync.php` dosyasını bir Cronjob'a bağlayarak verilerin güncel kalmasını sağlayın.
 
 ---
 
 ## 🇺🇸 English Description
 
-### Features
-- **Web-Focused Filtering:** Filters NIST vulnerability data to include only web-related entries (libraries, servers, databases, etc.). It excludes non-web data like OS or hardware to keep the database lean and relevant.
-- **Fast Scanning:** Detects technologies and matched vulnerabilities (CVE) in less than 0.5 seconds upon page load.
-- **Secret & Sensitive Data Scraping:** Identifies developer comments, API keys (AWS, Azure, Firebase, JWT), database connection strings, and potentially exposed filenames in the source code.
-- **Endpoint Discovery:** Lists all external links and subdomains to map out the site's structure.
-- **Active File Probing:** Automatically checks for over 30 critical exposure points such as `.env`, `.git/config`, `backup.zip`, and `sql` dumps.
-- **Automated Updates:** Uses GitHub Actions and NVD API 2.0 to keep the vulnerability database updated daily.
+### 🚀 Quick Start (For Users)
+To use the extension immediately:
+1. Download this project to your computer.
+2. Go to `chrome://extensions/` in your Chrome browser.
+3. Enable **Developer Mode** in the top right.
+4. Click **Load unpacked** and select this folder.
+*That's it! The extension will automatically fetch the latest vulnerability data from my database.*
 
-### Installation
-1. Upload the `shards/` folder and PHP scripts to your web server.
-2. Load the extension in Chrome via "Developer Mode" -> "Load unpacked".
-3. Optionally, add `NVD_API_KEY` to GitHub Secrets to speed up daily synchronization.
+### 🛠️ Features
+- **Web-Focused:** Targets only web stack vulnerabilities, filtering out OS or hardware noise.
+- **Fast Scanning:** Detects technologies and CVE matches in less than 0.5s.
+- **Secret Scraper:** Finds hidden developer comments, API keys, and DB credentials in the source code.
+- **Dynamic Probing:** Automatically guesses and checks for exposed backup files (`.zip`, `.sql`, `.bak`).
+- **Attack Surface:** Lists all external endpoints and subdomains.
 
----
-
-### Veri Kaynakları / Data Sources
-- NIST NVD API 2.0
-- OSV (Open Source Vulnerabilities)
+### 👨‍💻 For Developers (Self-Hosting)
+If you want to host the vulnerability data on your own server:
+1. Upload the PHP files and `shards/` folder to your server.
+2. Update the `BASE_URL` in `background.js` to point to your URL.
+3. Schedule `daily_sync.php` via Cronjob to keep the data fresh.
