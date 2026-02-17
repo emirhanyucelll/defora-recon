@@ -1,4 +1,4 @@
-// DEFORA RECON - TACTICAL HUD CONTROL (V60 - STABLE VERSION)
+// DEFORA RECON - TACTICAL HUD CONTROL (V61 - STABILIZED)
 document.addEventListener('DOMContentLoaded', async () => {
     const secretList = document.getElementById('secretList');
     const vulnList = document.getElementById('vulnList');
@@ -66,16 +66,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             allSecrets.forEach(s => {
                 const div = document.createElement('div');
                 div.className = "item-card secret-card";
-                // Kritiklik seviyesine göre renk belirle
                 let color = "var(--accent)";
                 if (s.type.includes("Kritik") || s.type.includes("Parola") || s.type.includes("Dosya")) color = "var(--danger)";
                 if (s.type.includes("Yorum")) color = "var(--warning)";
+
+                let path = "/";
+                try { if(s.url) path = new URL(s.url).pathname; } catch(e) {}
 
                 div.style.borderLeft = `3px solid ${color}`;
                 div.innerHTML = `
                     <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                         <span class="secret-label" style="background:${color}22; color:${color}; border:1px solid ${color}44;">${s.type}</span>
-                        ${s.url ? `<span style="font-size:0.55rem; color:var(--accent); opacity:0.9; font-weight:bold;">📍 ${s.url.replace(/https?:\/\/[^\/]+/, '') || '/'}</span>` : ''}
+                        <span style="font-size:0.55rem; color:var(--accent); opacity:0.9; font-weight:bold;">📍 ${path}</span>
                     </div>
                     <div class="secret-content" style="color:#eee; font-weight:bold; word-break: break-all;">${s.value}</div>
                 `;
@@ -145,15 +147,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `).join('');
 
-            const secretHTML = (data.secrets || []).map(s => `
+            const secretHTML = (data.secrets || []).map(s => {
+                let p = "/"; try { if(s.url) p = new URL(s.url).pathname; } catch(e) {}
+                return `
                 <div class="report-card">
                     <div style="display:flex; justify-content:space-between; align-items:start;">
                         <span class="badge badge-warning">${s.type}</span>
-                        <span style="font-size:0.7rem; color:#888;">📍 ${s.url ? new URL(s.url).pathname : '/'}</span>
+                        <span style="font-size:0.7rem; color:#888;">📍 ${p}</span>
                     </div>
                     <div style="font-family:monospace; background:#1a1a1a; color:#0f0; padding:8px; border-radius:4px; margin-top:8px; word-break:break-all; font-size:0.85rem; border:1px solid #333;">${s.value}</div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
 
             const endpointHTML = (data.endpoints || []).map(e => `<div class="endpoint-item">🔗 ${e}</div>`).join('');
 
@@ -197,40 +201,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div style="font-size:0.7rem; color:#555;">${new Date().toLocaleString()}</div>
                     </div>
                 </div>
-
                 <div class="grid">
                     <div class="section">
-                        <h2>Zafiyet Taraması (CVE/GHSA)</h2>
-                        ${vulnHTML || '<div class="report-card" style="color:#10b981;">✓ Bilinen zafiyet bulunamadı.</div>'}
+                        <h2>Zafiyet Taraması</h2>
+                        ${vulnHTML || '<div class="report-card">✓ Zafiyet bulunamadı.</div>'}
                     </div>
                     <div class="section">
-                        <h2>Veri Sızıntıları & Bulgular</h2>
-                        ${secretHTML || '<div class="report-card" style="color:#10b981;">✓ Hassas veri sızıntısı tespit edilmedi.</div>'}
+                        <h2>Veri Sızıntıları</h2>
+                        ${secretHTML || '<div class="report-card">✓ Sızıntı bulunamadı.</div>'}
                     </div>
                 </div>
-
                 <div class="section">
-                    <h2>Saldırı Yüzeyi (Endpoints)</h2>
-                    <div class="endpoint-list">
-                        ${endpointHTML || '<div style="color:#555;">Bağlantı bulunamadı.</div>'}
-                    </div>
+                    <h2>Saldırı Yüzeyi</h2>
+                    <div class="endpoint-list">${endpointHTML || 'Bağlantı bulunamadı.'}</div>
                 </div>
-
-                <div class="section">
-                    <h2>Teknoloji Envanteri</h2>
-                    <div class="tech-grid">
-                        ${(data.tech || []).map(t => `
-                            <div class="tech-item">
-                                <div style="font-weight:bold;">${t.name}</div>
-                                <div style="color:#666; font-size:0.75rem;">Sürüm: ${t.version}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <footer>
-                    Bu rapor Defora Recon tarafından otomatik oluşturulmuştur.
-                </footer>
+                <footer>Defora Recon tarafından otomatik oluşturulmuştur.</footer>
             </body>
             </html>`;
 
@@ -243,15 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-            const blob = new Blob([reportHTML], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `RECON_REPORT_${domain.replace(/\./g, '_')}.html`;
-            a.click();
-        });
-    }
-
+    // --- TAB SWITCHER ---
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
