@@ -13,11 +13,10 @@
         "Storage: S3 Bucket": /[a-z0-9.-]+\.s3\.amazonaws\.com/gi,
         "Token: GitHub": /ghp_[a-zA-Z0-9]{30,50}/g,
         "Token: Slack": /xox[bapr]-[0-9a-zA-Z-]{15,80}/g,
-        "Token: Stripe": /sk_live_[0-9a-zA-Z]{24}/g,
-        "Token: Twilio SID": /\bAC[0-9a-fA-F]{32}\b/g,
-        "Token: Mailgun": /key-[a-z0-9]{32}/gi,
-        "Token: SendGrid": /SG\.[a-zA-Z0-9_\-\. ]{64}/g,
-        "Token: Heroku": /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
+                "Token: Stripe": /sk_live_[0-9a-zA-Z]{24}/g,
+                "Token: Twilio SID": /\bAC[0-9a-fA-F]{32}\b/g,
+                "ID: UUID (Gizli Olabilir)": /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/g,
+                "Token: Mailgun": /key-[a-z0-9]{32}/gi,
         "Token: Shopify": /shppa_[a-fA-F0-9]{32}/g,
         "Token: Sentry DSN": /https:\/\/[a-f0-9]+(:[a-f0-9]+)?@sentry\.io\/[0-9]+/g,
         "Token: JWT": /\beyJ[a-zA-Z0-9._-]{50,500}\b/g,
@@ -108,19 +107,26 @@
             });
         }
 
-        // Unique & Send
-        const unique = Array.from(new Set(secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
-        chrome.runtime.sendMessage({
-            action: "SCAN_RESULTS",
-            data: {
-                secrets: unique,
-                tech,
-                endpoints: Array.from(endpoints),
-                candidates: Array.from(candidates), // BURASI DÜZELTİLDİ
-                links: foundLinks
+                // Unique & Send
+                try {
+                    const unique = Array.from(new Set(secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
+                    chrome.runtime.sendMessage({ 
+                        action: "SCAN_RESULTS", 
+                        data: { 
+                            secrets: unique, 
+                            tech, 
+                            endpoints: Array.from(endpoints),
+                            candidates: Array.from(candidates),
+                            links: foundLinks
+                        } 
+                    });
+                } catch(e) {}
             }
-        });
-    }
-
-    setTimeout(scrape, 100);
-})();
+        
+            // Sıfır gecikme ile başlat
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", scrape);
+            } else {
+                scrape();
+            }
+        })();

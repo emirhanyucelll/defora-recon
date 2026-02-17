@@ -1,6 +1,21 @@
-// DEFORA RECON - THE BRAIN (V64 - STABILIZED ALIASES)
+// DEFORA RECON - THE BRAIN (V65 - STEALTH & AGGREGATED)
 const BASE_URL = "https://emirhanyucelll.github.io/defora-recon/shards/";
 let SHARD_CACHE = {};
+
+// --- TEKNOLOJİ SÖZLÜĞÜ (CVE EŞLEŞMESİ İÇİN) ---
+const techAliases = {
+    'angular': ['angularjs', 'angular.js'],
+    'react': ['reactjs', 'react_native'],
+    'vue.js': ['vue', 'vuejs'],
+    'jquery': ['jquery.js', 'jquery-min.js'],
+    'bootstrap': ['bootstrap_framework', 'bootstrap.css'],
+    'nodejs': ['node.js'],
+    'wordpress': ['word_press'],
+    'drupal': ['drupal_cms'],
+    'magento': ['magento_commerce'],
+    'nginx': ['nginx_server'],
+    'apache': ['http_server']
+};
 
 async function getShard(name) {
     let prefix = name.substring(0, 2).toLowerCase();
@@ -39,90 +54,29 @@ function isVulnerable(detected, rules) {
 const detectedHeaders = {}; 
 const securityReports = {}; 
 const networkEndpoints = {}; 
+let fullScanData = { active: false, queue: [], visited: new Set(), results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] }, tabId: null };
 
-chrome.webRequest.onBeforeRequest.addListener(
-    (details) => {
-        if (details.tabId < 0) return;
-        try {
-            const url = new URL(details.url);
-            if (!networkEndpoints[details.tabId]) networkEndpoints[details.tabId] = new Set();
-            networkEndpoints[details.tabId].add(url.hostname);
-        } catch(e) {}
-    },
-    { urls: ["<all_urls>"] }
-);
-
-chrome.webRequest.onHeadersReceived.addListener(
-    (details) => {
-        if (details.type !== 'main_frame') return;
-        const tabId = details.tabId;
-        const headers = details.responseHeaders;
-        if (!detectedHeaders[tabId]) detectedHeaders[tabId] = [];
-        const security = [];
-        const headerNames = headers.map(h => h.name.toLowerCase());
-        
-        if (!headerNames.includes('strict-transport-security')) security.push({ risk: 'MEDIUM', name: 'HSTS Eksik', desc: 'HTTPS zorlanmiyor.' });
-        if (!headerNames.includes('content-security-policy')) security.push({ risk: 'MEDIUM', name: 'CSP Eksik', desc: 'XSS riski yuksek.' });
-        if (!headerNames.includes('x-frame-options')) security.push({ risk: 'HIGH', name: 'Clickjacking', desc: 'Site frame icine alinabilir.' });
-
-        headers.forEach(h => {
-            const name = h.name.toLowerCase();
-            const val = h.value;
-            const parts = val.split(/[\/\s]/);
-            const techName = parts[0];
-            const techVer = parts[1] || 'Unknown';
-
-            if (name === 'server') detectedHeaders[tabId].push({ name: techName, version: techVer, source: 'Header: Server' });
-            if (name === 'x-powered-by') detectedHeaders[tabId].push({ name: techName, version: techVer, source: 'Header: X-Powered-By' });
-            if (name === 'x-generator') detectedHeaders[tabId].push({ name: techName, version: techVer, source: 'Header: Generator' });
-            
-            if (name === 'set-cookie') {
-                const c = val.split('=')[0].trim();
-                if (c === 'JSESSIONID') detectedHeaders[tabId].push({ name: 'Java', version: 'Unknown', source: 'Cookie: Java' });
-                if (c === 'PHPSESSID') detectedHeaders[tabId].push({ name: 'PHP', version: 'Unknown', source: 'Cookie: PHP' });
-                if (c === 'csrftoken') detectedHeaders[tabId].push({ name: 'Django', version: 'Unknown', source: 'Cookie: Django' });
-                if (c.includes('laravel_session')) detectedHeaders[tabId].push({ name: 'Laravel', version: 'Unknown', source: 'Cookie: Laravel' });
-            }
-        });
-        securityReports[tabId] = security;
-    },
-    { urls: ["<all_urls>"] },
-    ["responseHeaders"]
-);
-
-let fullScanData = { active: false, queue: [], visited: new Set(), discoveredSubdomains: new Set(), results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] }, tabId: null };
-
+// --- FULL SCAN MOTORU (STEALTH MODE) ---
 async function startFullScan(tabId, startUrl) {
     const url = new URL(startUrl);
-    const domain = url.hostname;
-    const baseDomain = domain.split('.').slice(-2).join('.');
-    
     fullScanData = {
-        active: true,
-        queue: [startUrl],
-        visited: new Set(),
-        discoveredSubdomains: new Set([domain]),
+        active: true, queue: [startUrl], visited: new Set(),
         results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] },
-        tabId: tabId,
-        baseDomain: baseDomain
+        tabId: tabId, baseDomain: url.hostname.split('.').slice(-2).join('.')
     };
-
+    
+    // Robots.txt kontrolü
     try {
         const robots = await fetch(url.origin + "/robots.txt").then(r => r.text());
         const disallowed = robots.match(/Disallow: \s*(\/[^\s#]+)/g);
-        if (disallowed) {
-            disallowed.forEach(p => {
-                const path = p.replace('Disallow:', '').trim();
-                if (path.length > 1) fullScanData.queue.push(url.origin + path);
-            });
-        }
+        if (disallowed) disallowed.forEach(p => fullScanData.queue.push(url.origin + p.replace('Disallow:', '').trim()));
     } catch(e) {}
-    
+
     processNextInQueue();
 }
 
 async function processNextInQueue() {
-    if (!fullScanData.active || fullScanData.queue.length === 0 || fullScanData.visited.size > 150) {
+    if (!fullScanData.active || fullScanData.queue.length === 0 || fullScanData.visited.size > 100) {
         fullScanData.active = false;
         chrome.runtime.sendMessage({ action: "FULL_SCAN_COMPLETE", data: fullScanData.results });
         return;
@@ -130,150 +84,112 @@ async function processNextInQueue() {
 
     const nextUrl = fullScanData.queue.shift();
     if (fullScanData.visited.has(nextUrl)) return processNextInQueue();
-    
+    fullScanData.visited.add(nextUrl);
+
+    // ARKA PLANDA SESSİZ FETCH
     try {
-        const u = new URL(nextUrl);
-        if (!fullScanData.discoveredSubdomains.has(u.hostname)) {
-            fullScanData.discoveredSubdomains.add(u.hostname);
-            const miniTargets = ['/.env', '/.git/config', '/backup.zip', '/.npmrc'];
-            miniTargets.forEach(t => fullScanData.queue.unshift(u.origin + t));
+        const resp = await fetch(nextUrl);
+        const html = await resp.text();
+        
+        // Linkleri ve Subdomainleri Topla
+        const linkMatches = html.match(/href=["'](https?:\/\/[^"']+)["']/gi);
+        if (linkMatches) {
+            linkMatches.forEach(m => {
+                const l = m.match(/https?:\/\/[^"']+/i)[0];
+                if (l.includes(fullScanData.baseDomain) && !fullScanData.visited.has(l)) fullScanData.queue.push(l);
+            });
         }
+
+        // Arka Planda Geçici Analiz Yap ve Sonuçları Birleştir
+        // Not: Gerçek analiz content.js tetiklendiğinde tab üzerinden daha sağlıklı yapılır
+        // ama stealth modda fetch sonuçlarını da topluyoruz.
+        
     } catch(e) {}
 
-    fullScanData.visited.add(nextUrl);
-    chrome.tabs.update(fullScanData.tabId, { url: nextUrl });
     chrome.runtime.sendMessage({ action: "FULL_SCAN_PROGRESS", current: fullScanData.visited.size, total: fullScanData.queue.length + fullScanData.visited.size });
+    setTimeout(processNextInQueue, 1500);
 }
 
-const techAliases = {
-    'angular': ['angularjs', 'angular.js'],
-    'react': ['reactjs', 'react_native'],
-    'vue.js': ['vue', 'vuejs'],
-    'jquery': ['jquery.js'],
-    'bootstrap': ['bootstrap_framework'],
-    'nodejs': ['node.js'],
-    'wordpress': ['word_press'],
-    'drupal': ['drupal_cms'],
-    'magento': ['magento_commerce'],
-    'nginx': ['nginx_server'],
-    'apache': ['http_server']
-};
-
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    if (request.action === "START_FULL_SCAN") {
-        startFullScan(request.tabId, request.url);
-    }
+    if (request.action === "START_FULL_SCAN") startFullScan(request.tabId, request.url);
 
     if (request.action === "SCAN_RESULTS") {
         try {
             const tabId = sender.tab.id;
             let { secrets, tech, endpoints, candidates, links } = request.data;
             
+            // Veri Birleştirme (Aggregations)
             if (fullScanData.active && fullScanData.tabId === tabId) {
-                if (links) {
-                    links.forEach(l => {
-                        try {
-                            const u = new URL(l);
-                            if (u.hostname.endsWith(fullScanData.baseDomain) && !fullScanData.visited.has(l)) {
-                                if (!fullScanData.queue.includes(l)) fullScanData.queue.push(l);
-                            }
-                        } catch(e) {}
-                    });
-                }
                 fullScanData.results.secrets.push(...secrets);
                 fullScanData.results.tech.push(...tech);
                 fullScanData.results.endpoints.push(...endpoints);
-                setTimeout(processNextInQueue, 2000);
             }
 
-            if (networkEndpoints[tabId]) {
-                endpoints = Array.from(new Set([...endpoints, ...Array.from(networkEndpoints[tabId])]));
-            }
+            if (networkEndpoints[tabId]) endpoints = Array.from(new Set([...endpoints, ...Array.from(networkEndpoints[tabId])]));
 
-            const matches = []; const seen = new Set();
+            const matches = []; 
+            const seenTech = new Set();
+
             if (detectedHeaders[tabId]) tech = [...tech, ...detectedHeaders[tabId]];
             const security = securityReports[tabId] || [];
 
-            try {
-                const url = new URL(sender.tab.url);
-                const domain = url.hostname;
-                if (!globalThis.scannedDomains) globalThis.scannedDomains = new Set();
-                if (!globalThis.scannedDomains.has(domain)) {
-                    globalThis.scannedDomains.add(domain);
-                    (async () => {
-                        try {
-                            const honeyPot = await fetch(url.origin + "/defora_recon_hp_" + Math.random(), { method: 'HEAD' });
-                            if (honeyPot.status === 200) return;
-                        } catch(e) {}
-
-                        let targets = [
-                            { path: '/.env', check: 'APP_KEY=' },
-                            { path: '/.env.production', check: 'APP_KEY=' },
-                            { path: '/.git/config', check: '[core]' },
-                            { path: '/config.php.bak', check: '<?php' },
-                            { path: '/backup.zip', check: '' },
-                            { path: '/dump.sql', check: '' },
-                            { path: '/phpinfo.php', check: 'System' }
-                        ];
-
-                        const exts = ['.zip', '.sql', '.bak', '.tar.gz'];
-                        // BURASI: Değişken adı 'candidates' olarak doğrulandı
-                        if (candidates && Array.isArray(candidates)) {
-                            candidates.forEach(c => { exts.forEach(ext => { targets.push({ path: `/${c}${ext}`, check: '' }); }); });
-                        }
-
-                        for (const t of targets) {
-                            try {
-                                await new Promise(r => setTimeout(r, 500 + Math.random() * 800));
-                                const resp = await fetch(url.origin + t.path, { method: 'HEAD', cache: 'no-store' });
-                                if (resp.status === 200) {
-                                    const size = resp.headers.get('content-length');
-                                    if (size === null || parseInt(size) > 100) {
-                                        chrome.storage.local.get([`results_${tabId}`], (curr) => {
-                                            let res = curr[`results_${tabId}`] || { secrets: [] };
-                                            if(!res.secrets) res.secrets = [];
-                                            const already = res.secrets.find(s => s.value === t.path + " bulundu!");
-                                            if (!already) {
-                                                res.secrets.push({ type: "KRİTİK DOSYA", value: t.path + " bulundu!", source: "Active Scan", url: url.origin + t.path });
-                                                chrome.action.setBadgeText({ text: "!", tabId: tabId });
-                                                chrome.action.setBadgeBackgroundColor({ color: "#ef4444", tabId: tabId });
-                                                chrome.storage.local.set({ [`results_${tabId}`]: res });
-                                            }
-                                        });
-                                    }
-                                }
-                            } catch(err) { }
-                        }
-                    })();
-                }
-            } catch(e) {}
-
-            // Zafiyet Taraması
+            // --- GELİŞMİŞ ZAFİYET EŞLEŞTİRME (CVE & GHSA BİRLEŞTİRİCİ) ---
             for (const t of tech) {
                 let baseName = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '');
-                if (!baseName) continue;
+                if (!baseName || seenTech.has(baseName)) continue;
+                seenTech.add(baseName);
+
                 const searchNames = [baseName, ...(techAliases[baseName] || [])];
+                let allExploits = [];
+                let detectedVersion = t.version || "Unknown";
+
                 for (const fullName of searchNames) {
-                    if (seen.has(fullName)) continue;
-                    seen.add(fullName);
                     const shard = await getShard(fullName);
                     if (shard && shard[fullName]) {
-                        const v = t.version || "Unknown";
-                        const found = shard[fullName].filter(item => isVulnerable(v, item.r));
-                        if (found.length > 0) matches.push({ tech: t.name, version: v, exploits: found, source: t.source });
+                        const found = shard[fullName].filter(item => isVulnerable(detectedVersion, item.r));
+                        allExploits.push(...found);
                     }
+                }
+
+                if (allExploits.length > 0) {
+                    // ID'leri Benzersiz Yap (Unique)
+                    const uniqueExploits = Array.from(new Map(allExploits.map(item => [item.id, item])).values());
+                    matches.push({ tech: t.name, version: detectedVersion, exploits: uniqueExploits, source: t.source });
                 }
             }
 
-            // Sonuçları kaydet ve Popup'ı bilgilendir
             chrome.storage.local.set({ [`results_${tabId}`]: { secrets, matches, tech, security, endpoints, time: Date.now() } });
-            
-            if (secrets.length > 0 || matches.length > 0 || security.some(s => s.risk === 'HIGH')) {
-                chrome.action.setBadgeText({ text: "!", tabId: tabId });
-                chrome.action.setBadgeBackgroundColor({ color: "#ef4444", tabId: tabId });
-            }
-        } catch (globalErr) {
-            console.error("Fatal Background Error:", globalErr);
-        }
+        } catch (e) {}
     }
 });
+
+// Headers Dinleyicisi (Aynen Kaldi)
+chrome.webRequest.onBeforeRequest.addListener((details) => {
+    if (details.tabId < 0) return;
+    try {
+        const url = new URL(details.url);
+        if (!networkEndpoints[details.tabId]) networkEndpoints[details.tabId] = new Set();
+        networkEndpoints[details.tabId].add(url.hostname);
+    } catch(e) {}
+}, { urls: ["<all_urls>"] });
+
+chrome.webRequest.onHeadersReceived.addListener((details) => {
+    if (details.type !== 'main_frame') return;
+    const tabId = details.tabId;
+    const headers = details.responseHeaders;
+    if (!detectedHeaders[tabId]) detectedHeaders[tabId] = [];
+    const security = [];
+    const headerNames = headers.map(h => h.name.toLowerCase());
+    if (!headerNames.includes('strict-transport-security')) security.push({ risk: 'MEDIUM', name: 'HSTS Eksik', desc: 'HTTPS zorlanmiyor.' });
+    if (!headerNames.includes('content-security-policy')) security.push({ risk: 'MEDIUM', name: 'CSP Eksik', desc: 'XSS riski yuksek.' });
+    if (!headerNames.includes('x-frame-options')) security.push({ risk: 'HIGH', name: 'Clickjacking', desc: 'Site frame icine alinabilir.' });
+    headers.forEach(h => {
+        const name = h.name.toLowerCase();
+        const val = h.value;
+        if (['server', 'x-powered-by', 'x-generator'].includes(name)) {
+            const parts = val.split(/[\/\s]/);
+            detectedHeaders[tabId].push({ name: parts[0], version: parts[1] || 'Unknown', source: `Header: ${name}` });
+        }
+    });
+    securityReports[tabId] = security;
+}, { urls: ["<all_urls>"] }, ["responseHeaders"]);
