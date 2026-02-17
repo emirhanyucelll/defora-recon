@@ -38,6 +38,20 @@ function isVulnerable(detected, rules) {
 
 const detectedHeaders = {}; 
 const securityReports = {}; 
+const networkEndpoints = {}; // Canlı ağ trafiği takibi
+
+// --- CANLI AĞ CASUSU (Hidden API & Endpoint Discovery) ---
+chrome.webRequest.onBeforeRequest.addListener(
+    (details) => {
+        if (details.tabId < 0) return;
+        try {
+            const url = new URL(details.url);
+            if (!networkEndpoints[details.tabId]) networkEndpoints[details.tabId] = new Set();
+            networkEndpoints[details.tabId].add(url.hostname);
+        } catch(e) {}
+    },
+    { urls: ["<all_urls>"] }
+);
 
 chrome.webRequest.onHeadersReceived.addListener(
     (details) => {
@@ -81,8 +95,13 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.action === "SCAN_RESULTS") {
         const tabId = sender.tab.id;
         let { secrets, tech, endpoints, candidates } = request.data;
-        const matches = []; const seen = new Set();
+        
+        // Ağ trafiğinden gelen gizli endpointleri ekle
+        if (networkEndpoints[tabId]) {
+            endpoints = Array.from(new Set([...endpoints, ...Array.from(networkEndpoints[tabId])]));
+        }
 
+        const matches = []; const seen = new Set();
         if (detectedHeaders[tabId]) tech = [...tech, ...detectedHeaders[tabId]];
         const security = securityReports[tabId] || [];
 
@@ -92,9 +111,16 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             if (!globalThis.scannedDomains) globalThis.scannedDomains = new Set();
             if (!globalThis.scannedDomains.has(domain)) {
                 globalThis.scannedDomains.add(domain);
+                
                 (async () => {
-                    // Sabit Listemiz (Yüksek Olasılık)
-                    let targets = [
+                    // --- SOFT 404 (YALANCI SUNUCU) KONTROLÜ ---
+                    const honeyPot = await fetch(url.origin + "/defora_recon_honey_pot_" + Math.random(), { method: 'HEAD' });
+                    if (honeyPot.status === 200) {
+                        console.log("Sunucu Yalancı 200 dönüyor. Aktif tarama iptal.");
+                        return; 
+                    }
+
+                    const targets = [
                         { path: '/.env', check: 'APP_KEY=' },
                         { path: '/.env.production', check: 'APP_KEY=' },
                         { path: '/.git/config', check: '[core]' },

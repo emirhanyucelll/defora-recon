@@ -114,8 +114,37 @@ foreach ($watchlist as $tech) {
     
     if ($code === 200) {
         $json = json_decode($resp, true);
-        $count = isset($json['vulns']) ? count($json['vulns']) : 0;
-        // ... (Shard güncelleme mantığı buraya gelecek)
+        $batch = []; $count = 0;
+        if (isset($json['vulns'])) {
+            foreach ($json['vulns'] as $v) {
+                // CVE ALIAS KONTROLÜ
+                $displayId = $v['id'];
+                if (isset($v['aliases'])) {
+                    foreach ($v['aliases'] as $alias) {
+                        if (strpos($alias, 'CVE-') === 0) { $displayId = $alias; break; }
+                    }
+                }
+
+                $rules = [];
+                if (isset($v['affected'])) {
+                    foreach ($v['affected'] as $aff) {
+                        foreach ($aff['ranges'] ?? [] as $range) {
+                            $r = [];
+                            foreach ($range['events'] as $evt) {
+                                if (isset($evt['introduced'])) $r['sInc'] = $evt['introduced'];
+                                if (isset($evt['fixed'])) $r['eExc'] = $evt['fixed'];
+                            }
+                            if(!empty($r)) $rules[] = $r;
+                        }
+                    }
+                }
+                if(!empty($rules)) {
+                    $batch[$tech][] = ['id' => $displayId, 'sev' => 'HIGH', 'r' => $rules, 'src' => "OSV"];
+                    $count++;
+                }
+            }
+        }
+        updateShards($batch);
         echo "TAMAM ($count kayit).\n";
     } else { echo "HATA ($code).\n"; }
     usleep(200000);

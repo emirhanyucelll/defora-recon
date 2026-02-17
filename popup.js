@@ -73,11 +73,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 div.style.borderLeft = `3px solid ${color}`;
                 div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
                         <span class="secret-label" style="background:${color}22; color:${color}; border:1px solid ${color}44;">${s.type}</span>
-                        <span style="font-size:0.6rem; color:var(--text-dim);">${s.source}</span>
+                        ${s.url ? `<span style="font-size:0.55rem; color:var(--accent); opacity:0.7;">📍 ${new URL(s.url).pathname}</span>` : ''}
                     </div>
-                    <div class="secret-content" style="color:#eee;">${s.value}</div>
+                    <div class="secret-content" style="color:#eee; font-weight:bold; word-break: break-all;">${s.value}</div>
                 `;
                 secretList.appendChild(div);
             });

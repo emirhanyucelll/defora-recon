@@ -192,29 +192,36 @@ foreach ($watchlist as $tech) {
         $json = json_decode($resp, true);
         if (isset($json['vulns'])) {
             foreach ($json['vulns'] as $v) {
+                // OSV 'modified' tarihini kontrol et
                 $vMod = isset($v['modified']) ? strtotime($v['modified']) : 0;
-                // Sadece son çalıştırmadan sonra güncellenenleri al
                 if ($vMod > $last_run) {
+                    // ID Formatlama: CVE varsa onu kullan, yoksa GHSA
+                    $displayId = $v['id'];
+                    if (isset($v['aliases'])) {
+                        foreach ($v['aliases'] as $alias) {
+                            if (strpos($alias, 'CVE-') === 0) { $displayId = $alias; break; }
+                        }
+                    }
+
                     $rules = [];
-                    // Affected analizi
                     if (isset($v['affected'])) {
                         foreach ($v['affected'] as $aff) {
-                             $ranges = $aff['ranges'] ?? [];
-                             foreach ($ranges as $range) {
-                                 if (($range['type'] ?? '') === 'SEMVER' || ($range['type'] ?? '') === 'ECOSYSTEM') {
+                            if (strtolower($aff['package']['name'] ?? '') !== strtolower($tech)) continue;
+                            foreach ($aff['ranges'] ?? [] as $range) {
+                                if (($range['type'] ?? '') === "SEMVER") {
                                     $r = [];
                                     foreach ($range['events'] as $evt) {
                                         if (isset($evt['introduced'])) $r['sInc'] = $evt['introduced'];
                                         if (isset($evt['fixed'])) $r['eExc'] = $evt['fixed'];
                                     }
                                     if(!empty($r)) $rules[] = $r;
-                                 }
-                             }
+                                }
+                            }
                         }
                     }
-                    if (!empty($rules)) {
-                        $batch[$cleanName][] = ['id' => $v['id'], 'sev' => 'HIGH', 'r' => $rules, 'src' => "OSV"];
-                        $osv_hits++;
+                    if(!empty($rules)) {
+                        $batch[$tech][] = ['id' => $displayId, 'sev' => 'HIGH', 'r' => $rules, 'src' => "OSV-API"];
+                        $osv_count++;
                     }
                 }
             }
