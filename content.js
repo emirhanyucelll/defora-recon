@@ -75,15 +75,9 @@
             if (name) tech.push({ name, version: url.match(/(\d+\.\d+(\.\d+)?)/)?.[0] || "Unknown", source: "Script" });
         });
 
-        // 4. Endpoint & Aday İsimler
+        // 4. Endpoint & Saldırı Yüzeyi Keşfi (ULTRA HIZLI)
         const endpoints = new Set();
-        const candidates = new Set();
         const foundLinks = [];
-
-        window.location.pathname.split('/').filter(p => p.length > 2 && !p.includes('.')).forEach(p => {
-            endpoints.add(p);
-            candidates.add(p);
-        });
 
         document.querySelectorAll('a, script, img, link').forEach(el => {
             const url = el.href || el.src;
@@ -96,7 +90,7 @@
             }
         });
 
-        // 5. Gizli Yol Madenciliği
+        // 5. Gizli Yol Madenciliği (Hızlı Regex)
         const paths = html.match(/["'](\/[a-z0-9_\-\.\/]{2,50})["']/gi);
         if (paths) {
             paths.forEach(p => {
@@ -107,26 +101,22 @@
             });
         }
 
-                // Unique & Send
-                try {
-                    const unique = Array.from(new Set(secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
-                    chrome.runtime.sendMessage({ 
-                        action: "SCAN_RESULTS", 
-                        data: { 
-                            secrets: unique, 
-                            tech, 
-                            endpoints: Array.from(endpoints),
-                            candidates: Array.from(candidates),
-                            links: foundLinks
-                        } 
-                    });
-                } catch(e) {}
-            }
-        
-            // Sıfır gecikme ile başlat
-            if (document.readyState === "loading") {
-                document.addEventListener("DOMContentLoaded", scrape);
-            } else {
-                scrape();
-            }
-        })();
+        // --- ANLIK MESAJ GÖNDERİMİ ---
+        try {
+            const uniqueSecrets = Array.from(new Set(secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
+            chrome.runtime.sendMessage({ 
+                action: "SCAN_RESULTS", 
+                data: { 
+                    secrets: uniqueSecrets, 
+                    tech, 
+                    endpoints: Array.from(endpoints),
+                    candidates: Array.from(endpoints), // x.zip adaylari icin de endpointleri kullan
+                    links: foundLinks
+                } 
+            });
+        } catch(e) {}
+    }
+
+    // Gecikmesiz Baslat
+    scrape();
+})();
