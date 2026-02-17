@@ -151,62 +151,55 @@ document.addEventListener('DOMContentLoaded', async () => {
             <html lang="tr">
             <head>
                 <meta charset="UTF-8">
-                <title>Recon Analiz - ${domain}</title>
+                <title>Recon Audit - ${domain}</title>
                 <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; background: #f9fafb; margin: 0; padding: 50px; line-height: 1.6; }
-                    .report-container { max-width: 900px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #eee; }
-                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3b82f6; padding-bottom: 25px; margin-bottom: 40px; }
-                    h1 { margin: 0; color: #1e3a8a; font-size: 24px; font-weight: 800; }
-                    .score-circle { width: 80px; height: 80px; border-radius: 50%; background: #eff6ff; border: 4px solid #3b82f6; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-                    .score-circle .val { font-size: 20px; font-weight: 900; color: #3b82f6; line-height: 1; }
-                    .score-circle .lbl { font-size: 9px; font-weight: 700; color: #60a5fa; }
-                    h2 { font-size: 14px; text-transform: uppercase; color: #64748b; letter-spacing: 1px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
-                    .report-section-item { margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #edf2f7; }
-                    .item-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
-                    .type-label { font-weight: 800; color: #1e293b; }
-                    .path-label { color: #3b82f6; font-family: monospace; font-size: 12px; }
-                    .code-box { font-family: 'Consolas', monospace; background: #1e293b; color: #34d399; padding: 12px; border-radius: 6px; font-size: 13px; word-break: break-all; }
-                    .tag-danger { background: #fee2e2; color: #b91c1c; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 5px; border: 1px solid #fecaca; }
-                    .tag-row { margin-top: 8px; }
-                    .endpoint-link { font-family: monospace; color: #64748b; font-size: 12px; margin-bottom: 4px; }
-                    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-                    .text-muted { color: #94a3b8; font-weight: 400; }
-                    footer { margin-top: 50px; text-align: center; font-size: 12px; color: #cbd5e1; border-top: 1px solid #f1f5f9; padding-top: 20px; }
+                    body { font-family: 'Inter', -apple-system, sans-serif; background: #f3f4f6; color: #1f2937; margin: 0; padding: 40px; }
+                    .report-wrapper { max-width: 950px; margin: auto; background: white; border-radius: 16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05); padding: 50px; }
+                    .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #e5e7eb; padding-bottom: 30px; margin-bottom: 40px; }
+                    h1 { margin: 0; color: #111827; font-size: 28px; font-weight: 800; }
+                    .score-pill { background: #eff6ff; color: #2563eb; padding: 10px 20px; border-radius: 99px; font-weight: 900; font-size: 18px; border: 1px solid #dbeafe; }
+                    h2 { font-size: 12px; text-transform: uppercase; color: #6b7280; letter-spacing: 1.5px; margin: 40px 0 20px 0; display: flex; align-items: center; }
+                    h2::after { content: ""; flex: 1; height: 1px; background: #e5e7eb; margin-left: 15px; }
+                    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+                    .card { background: #f9fafb; border: 1px solid #f3f4f6; padding: 20px; border-radius: 12px; margin-bottom: 15px; transition: 0.2s; }
+                    .card:hover { border-color: #d1d5db; }
+                    .card-title { font-weight: 700; color: #111827; margin-bottom: 8px; font-size: 15px; }
+                    .badge { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; margin-right: 5px; }
+                    .badge-danger { background: #fee2e2; color: #dc2626; }
+                    .badge-warn { background: #fef3c7; color: #d97706; }
+                    .code-snippet { font-family: 'JetBrains Mono', monospace; background: #111827; color: #10b981; padding: 12px; border-radius: 8px; font-size: 13px; margin-top: 10px; word-break: break-all; }
+                    .footer-text { margin-top: 60px; text-align: center; color: #9ca3af; font-size: 13px; border-top: 1px solid #f3f4f6; padding-top: 30px; }
                 </style>
             </head>
             <body>
-                <div class="report-container">
+                <div class="report-wrapper">
                     <div class="header">
                         <div>
-                            <h1>Defora Recon | Analiz Raporu</h1>
-                            <div style="color:#64748b; margin-top:5px;">Hedef: <strong>${domain}</strong></div>
+                            <h1>Defora Recon Audit</h1>
+                            <div style="color:#6b7280; margin-top:8px;">Hedef Alan Adı: <strong>${domain}</strong></div>
                         </div>
-                        <div class="score-circle">
-                            <div class="lbl">GÜVENLİK</div>
-                            <div class="val">${score.split('/')[0]}</div>
-                            <div class="lbl">PUANI</div>
-                        </div>
+                        <div class="score-pill">GÜVENLİK SKORU: ${score}</div>
                     </div>
 
-                    <div class="grid-2">
+                    <div class="grid">
                         <div>
-                            <h2>Zafiyet Bulguları</h2>
-                            ${vulnHTML || '<div class="report-section-item" style="color:#10b981;">Bilinen zafiyet tespit edilmedi.</div>'}
+                            <h2>🛡️ Zafiyet Bulguları</h2>
+                            ${vulnHTML || '<div class="card" style="color:#059669;">Bilinen zafiyet tespit edilmedi.</div>'}
                         </div>
                         <div>
-                            <h2>Veri Sızıntıları</h2>
-                            ${secretHTML || '<div class="report-section-item" style="color:#10b981;">Hassas veri bulunamadı.</div>'}
+                            <h2>🔍 Veri Sızıntıları</h2>
+                            ${secretHTML || '<div class="card" style="color:#059669;">Hassas veri sızıntısı bulunamadı.</div>'}
                         </div>
                     </div>
 
-                    <div style="margin-top: 30px;">
-                        <h2>Dış Kaynaklar</h2>
-                        <div class="report-section-item">
-                            <div style="display:grid; grid-template-columns: 1fr 1fr;">${endpointHTML || 'Bağlantı yok.'}</div>
-                        </div>
+                    <h2>🌐 Saldırı Yüzeyi & Dış Kaynaklar</h2>
+                    <div class="card" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-family:monospace; font-size:12px; color:#4b5563;">
+                        ${endpointHTML || 'Dış bağlantı yok.'}
                     </div>
 
-                    <footer>Bu rapor Defora Recon tarafından ${new Date().toLocaleString()} tarihinde oluşturulmuştur.</footer>
+                    <div class="footer-text">
+                        Bu denetim raporu Defora Recon Engine tarafından ${new Date().toLocaleString()} tarihinde üretilmiştir.
+                    </div>
                 </div>
             </body>
             </html>`;
@@ -220,36 +213,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // --- INITIAL SCAN STATE ---
+    chrome.storage.local.get(['fullScanActive', 'scanProgress', 'scanStatus'], (res) => {
+        if (res.fullScanActive) {
+            fullScanBtn.innerText = "TARANIYOR...";
+            fullScanBtn.disabled = true;
+            document.getElementById('scanProgress').style.display = 'block';
+            document.getElementById('progressCount').innerText = res.scanProgress + "%";
+        }
+    });
+
     // --- FULL SCAN HANDLER ---
-    const fullScanBtn = document.getElementById('fullScan');
     if (fullScanBtn) {
         fullScanBtn.addEventListener('click', () => {
             chrome.runtime.sendMessage({ action: "START_FULL_SCAN", tabId: tab.id, url: tab.url });
             fullScanBtn.innerText = "TARANIYOR...";
             fullScanBtn.disabled = true;
             document.getElementById('scanProgress').style.display = 'block';
+            document.getElementById('progressCount').innerText = "0%";
         });
     }
 
-    chrome.runtime.onMessage.addListener((msg) => {
-        if (request.action === "FULL_SCAN_PROGRESS") {
-            document.getElementById('progressCount').innerText = `${msg.current}/${msg.total}`;
-        }
-        if (request.action === "FULL_SCAN_COMPLETE") {
-            fullScanBtn.innerText = "SCAN COMPLETE";
-            // Sonuçları storage'a yaz
-            chrome.storage.local.set({ [`results_${tab.id}`]: msg.data }, () => {
-                render(msg.data);
-                // OTOMATİK RAPOR İNDİRME
-                exportBtn.click();
-                setTimeout(() => { 
-                    document.getElementById('scanProgress').style.display = 'none';
-                    fullScanBtn.innerText = "FULL SCAN";
-                    fullScanBtn.disabled = false;
-                }, 2000);
-            });
-        }
-    });
+    // Periyodik Progress Kontrolü
+    setInterval(() => {
+        chrome.storage.local.get(['fullScanActive', 'scanProgress'], (res) => {
+            if (res.fullScanActive) {
+                document.getElementById('progressCount').innerText = res.scanProgress + "%";
+            } else if (fullScanBtn.innerText === "TARANIYOR...") {
+                fullScanBtn.innerText = "FULL SCAN";
+                fullScanBtn.disabled = false;
+                document.getElementById('scanProgress').style.display = 'none';
+            }
+        });
+    }, 1000);
 
     // --- TAB SWITCHER ---
     document.querySelectorAll('.tab-btn').forEach(btn => {
