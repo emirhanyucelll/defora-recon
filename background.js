@@ -1,32 +1,27 @@
-// DEFORA RECON - THE BRAIN (V67 - ULTIMATE STEALTH & BACKGROUND ENGINE)
+// DEFORA RECON - THE BRAIN (V70 - TRUE STEALTH ANALYZER)
 const BASE_URL = "https://emirhanyucelll.github.io/defora-recon/shards/";
 let SHARD_CACHE = {};
 
 const techAliases = {
     'angular': ['angularjs', 'angular.js'],
-    'react': ['reactjs', 'react_native'],
+    'react': ['reactjs'],
     'vue.js': ['vue', 'vuejs'],
-    'jquery': ['jquery.js', 'jquery-min.js'],
-    'bootstrap': ['bootstrap_framework'],
-    'nodejs': ['node.js'],
-    'wordpress': ['word_press'],
-    'drupal': ['drupal_cms'],
-    'nginx': ['nginx_server'],
-    'apache': ['http_server']
+    'jquery': ['jquery.js'],
+    'bootstrap': ['bootstrap_framework']
 };
 
+// Sızıntı Patternları (Arka plan analizi için kopyalandı)
 const patterns = {
-    "Cloud: AWS Key": /AKIA[0-9A-Z]{16}/g,
+    "Cloud: AWS": /AKIA[0-9A-Z]{16}/g,
     "Cloud: Google": /AIza[0-9A-Za-z\-_]{20,50}/g,
     "Token: GitHub": /ghp_[a-zA-Z0-9]{30,50}/g,
     "Token: Twilio SID": /\bAC[0-9a-fA-F]{32}\b/g,
-    "ID: UUID (Potansiyel Sızıntı)": /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/g,
-    "Token: JWT": /\beyJ[a-zA-Z0-9._-]{50,500}\b/g,
+    "ID: UUID": /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/g,
     "Bağlantı: DB Link": /(?:postgres(?:ql)?|mongodb(?:\+srv)?|mysql|redis):\/\/[a-z0-9._-]+\:[a-z0-9._-]+\@[a-z0-9.-]+/gi,
     "Dosya: Hassas": /[a-z0-9_\-\.]+\.(?:env|conf|bak|sql|ini|log|yaml|sh|old|zip|tar\.gz)/gi
 };
 
-// --- YARDIMCI FONKSIYONLAR ---
+// --- YARDIMCI FONKSİYONLAR ---
 async function getShard(name) {
     let prefix = name.substring(0, 2).toLowerCase();
     if (prefix.length < 2) prefix += '_';
@@ -60,15 +55,15 @@ function isVulnerable(detected, rules) {
     return false;
 }
 
-let fullScanData = { active: false, queue: [], visited: new Set(), results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] }, domain: "" };
+// --- FULL SCAN MOTORU (STEALTH & DEEP ANALYZER) ---
+let fullScanData = { active: false, queue: [], visited: new Set(), results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] }, tabId: null, domain: "" };
 
-// --- TRUE BACKGROUND SCAN ENGINE ---
 async function startFullScan(tabId, startUrl) {
     const url = new URL(startUrl);
     fullScanData = {
         active: true, queue: [startUrl], visited: new Set(),
         results: { secrets: [], tech: [], endpoints: [], matches: [], security: [] },
-        domain: url.hostname, baseDomain: url.hostname.split('.').slice(-2).join('.')
+        tabId: tabId, domain: url.hostname, baseDomain: url.hostname.split('.').slice(-2).join('.')
     };
     chrome.storage.local.set({ fullScanActive: true, scanProgress: 0 });
     processNextInQueue();
@@ -84,16 +79,14 @@ async function processNextInQueue() {
     if (fullScanData.visited.has(nextUrl)) return processNextInQueue();
     fullScanData.visited.add(nextUrl);
 
-    // Update Progress
     const progress = Math.round((fullScanData.visited.size / (fullScanData.queue.length + fullScanData.visited.size)) * 100);
     chrome.storage.local.set({ scanProgress: progress });
 
     try {
-        // GERCEK ARKA PLAN TARAMASI (Sekmeye dokunmadan)
         const resp = await fetch(nextUrl);
         const html = await resp.text();
         
-        // 1. Sızıntı Analizi (Regex)
+        // 1. Arka Planda Sızıntı Analizi
         for (let [type, regex] of Object.entries(patterns)) {
             const matches = html.matchAll(regex);
             for (const m of matches) {
@@ -107,58 +100,29 @@ async function processNextInQueue() {
             links.forEach(m => {
                 let l = m.match(/["']([^"']+)["']/)[1];
                 if (l.startsWith('/')) l = new URL(nextUrl).origin + l;
-                if (l.includes(fullScanData.baseDomain) && !fullScanData.visited.has(l)) fullScanData.queue.push(l);
+                if (l.includes(fullScanData.baseDomain) && !fullScanData.visited.has(l)) {
+                    if (!fullScanData.queue.includes(l)) fullScanData.queue.push(l);
+                }
             });
         }
     } catch(e) {}
 
-    setTimeout(processNextInQueue, 1000);
+    setTimeout(processNextInQueue, 1500);
 }
 
 function finishFullScan() {
     fullScanData.active = false;
     chrome.storage.local.set({ fullScanActive: false });
-    generateAndDownloadReport();
-}
-
-async function generateAndDownloadReport() {
+    // Verileri temizle (Duplicate'leri sil)
     const d = fullScanData.results;
-    const domain = fullScanData.domain;
+    d.secrets = Array.from(new Set(d.secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
+    d.tech = Array.from(new Set(d.tech.map(t => JSON.stringify(t)))).map(t => JSON.parse(t));
+    d.endpoints = Array.from(new Set(d.endpoints));
     
-    // Verileri Unique yap
-    const uniqueSecrets = Array.from(new Set(d.secrets.map(s => JSON.stringify(s)))).map(s => JSON.parse(s));
-    
-    const secretHTML = uniqueSecrets.map(s => `
-        <div class="card">
-            <div style="display:flex; justify-content:space-between;">
-                <span class="badge warn">${s.type}</span>
-                <small style="color:#888;">📍 ${new URL(s.url).pathname}</small>
-            </div>
-            <div class="code-snippet">${s.value}</div>
-        </div>`).join('');
-
-    const reportHTML = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>Defora Audit - ${domain}</title>
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #1f2937; padding: 50px; }
-        .wrapper { max-width: 900px; margin: auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        .header { border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; }
-        h1 { margin: 0; color: #1e3a8a; }
-        .card { background: #f8fafc; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .badge { font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
-        .warn { background: #fef3c7; color: #92400e; }
-        .code-snippet { font-family: monospace; background: #111827; color: #10b981; padding: 10px; border-radius: 6px; margin-top: 8px; word-break: break-all; }
-    </style></head>
-    <body><div class="wrapper"><div class="header"><h1>Defora Recon Audit</h1><p>Hedef: ${domain}</p></div>
-    <h2>Sızıntı Bulguları</h2>${secretHTML || 'Bulunamadı'}</div></body></html>`;
-
-    const blob = "data:text/html;base64," + btoa(unescape(encodeURIComponent(reportHTML)));
-    chrome.downloads.download({
-        url: blob,
-        filename: `DEFORA_AUDIT_${domain.replace(/\./g, '_')}.html`
-    });
+    chrome.storage.local.set({ [`results_${fullScanData.tabId}`]: d });
+    chrome.runtime.sendMessage({ action: "FULL_SCAN_COMPLETE", data: d });
 }
 
-// Mesaj Dinleyicisi (Teknoloji Temizleme Dahil)
 chrome.runtime.onMessage.addListener(async (request, sender) => {
     if (request.action === "START_FULL_SCAN") startFullScan(request.tabId, request.url);
     if (request.action === "SCAN_RESULTS") {
@@ -166,9 +130,7 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
             const tabId = sender.tab.id;
             let { secrets, tech, endpoints } = request.data;
             
-            // ISIM VE VERSION TEMIZLEME
             tech = tech.map(t => {
-                if(!t.name) return t;
                 let clean = t.name.toLowerCase().replace(/(\.min)?\.js$/, '').replace(/[-_.]?v?\d+(\.\d+)*.*/, '').trim();
                 return { ...t, name: clean };
             }).filter(t => t.name);
@@ -177,14 +139,12 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
             for (const t of tech) {
                 if (seenTech.has(t.name)) continue;
                 seenTech.add(t.name);
-                
                 const searchNames = [t.name, ...(techAliases[t.name] || [])];
                 let allExploits = [];
                 for (const fullName of searchNames) {
                     const shard = await getShard(fullName);
                     if (shard && shard[fullName]) {
-                        const found = shard[fullName].filter(item => isVulnerable(t.version, item.r));
-                        allExploits.push(...found);
+                        allExploits.push(...shard[fullName].filter(item => isVulnerable(t.version, item.r)));
                     }
                 }
                 if (allExploits.length > 0) {
@@ -192,7 +152,24 @@ chrome.runtime.onMessage.addListener(async (request, sender) => {
                     matches.push({ tech: t.name, version: t.version || "Unknown", exploits: unique });
                 }
             }
-            chrome.storage.local.set({ [`results_${tabId}`]: { secrets, matches, tech, endpoints, time: Date.now() } });
+
+            const currentSecurity = securityReports[tabId] || [];
+            const currentRes = { secrets, matches, tech, security: currentSecurity, endpoints, time: Date.now() };
+            chrome.storage.local.set({ [`results_${tabId}`]: currentRes });
         } catch(e) {}
     }
 });
+
+chrome.webRequest.onHeadersReceived.addListener((details) => {
+    if (details.type !== 'main_frame') return;
+    const tabId = details.tabId;
+    const headers = details.responseHeaders;
+    const security = [];
+    const hNames = headers.map(h => h.name.toLowerCase());
+    
+    if (!hNames.includes('strict-transport-security')) security.push({ risk: 'MEDIUM', name: 'HSTS Eksik', desc: 'HTTPS zorlanmiyor.' });
+    if (!hNames.includes('content-security-policy')) security.push({ risk: 'MEDIUM', name: 'CSP Eksik', desc: 'XSS riski yuksek.' });
+    if (!hNames.includes('x-frame-options')) security.push({ risk: 'HIGH', name: 'Clickjacking', desc: 'Site frame icine alinabilir.' });
+    
+    securityReports[tabId] = security;
+}, { urls: ["<all_urls>"] }, ["responseHeaders"]);
