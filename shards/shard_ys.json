@@ -1,1 +1,1 @@
-{"yss":[{"id":"CVE-2018-13707","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD-MOP"}],"yshopmall":[{"id":"CVE-2024-50648","sev":"HIGH","r":[{"exact":"1.0"}],"src":"NVD-MOP"},{"id":"CVE-2025-15496","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"yss":[{"id":"CVE-2018-13707","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD-MOP"}],"yshopmall":[{"id":"CVE-2024-50648","sev":"HIGH","r":[{"exact":"1.0"}],"src":"NVD-MOP"},{"id":"CVE-2025-15496","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2026-2146","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}
