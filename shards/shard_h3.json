@@ -1,1 +1,1 @@
-{"h3blog":[{"id":"CVE-2025-13181","sev":"HIGH","r":[{"exact":"1.0.0"}],"src":"NVD-MOP"},{"id":"CVE-2025-13182","sev":"HIGH","r":[{"exact":"1.0.0"}],"src":"NVD-MOP"}],"h3":[{"id":"CVE-2026-23527","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"h3blog":[{"id":"CVE-2025-13181","sev":"HIGH","r":[{"exact":"1.0.0"}],"src":"NVD"},{"id":"CVE-2025-13182","sev":"HIGH","r":[{"exact":"1.0.0"}],"src":"NVD-MOP"}],"h3":[{"id":"CVE-2026-23527","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
