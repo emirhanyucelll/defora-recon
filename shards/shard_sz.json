@@ -1,1 +1,1 @@
-{"szchat":[{"id":"CVE-2021-3279","sev":"HIGH","r":[{"exact":"4"}],"src":"NVD"}]}
+{"szchat":[{"id":"CVE-2021-3279","sev":"HIGH","r":[{"exact":"4"}],"src":"NVD"}],"sz-boot-parent":[{"id":"CVE-2026-3185","sev":"HIGH","r":[{"exact":"1.3.2"}],"src":"NVD"},{"id":"CVE-2026-3186","sev":"HIGH","r":[{"exact":"1.3.2"}],"src":"NVD"},{"id":"CVE-2026-3187","sev":"HIGH","r":[{"exact":"1.3.2"}],"src":"NVD"}]}
