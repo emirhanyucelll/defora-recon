@@ -1,1 +1,1 @@
-{"zdstatistics":[{"id":"CVE-2014-4605","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"zdir":[{"id":"CVE-2023-23314","sev":"HIGH","r":[{"exact":"3.2.0"}],"src":"NVD-MOP"}]}
+{"zdstatistics":[{"id":"CVE-2014-4605","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"zdir":[{"id":"CVE-2023-23314","sev":"HIGH","r":[{"exact":"3.2.0"}],"src":"NVD-MOP"},{"id":"CVE-2025-66945","sev":"HIGH","r":[{"exact":"*","sInc":"4.1.1"}],"src":"NVD"}]}
