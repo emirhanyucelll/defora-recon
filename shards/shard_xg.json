@@ -1,1 +1,1 @@
-{"xgi_vga_display_manager":[{"id":"CVE-2015-5466","sev":"HIGH","r":[{"exact":"6.14.10.1090"}],"src":"NVD-MOP"}],"xg5000":[{"id":"CVE-2022-2758","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"xgi_vga_display_manager":[{"id":"CVE-2015-5466","sev":"HIGH","r":[{"exact":"6.14.10.1090"}],"src":"NVD-MOP"}],"xg5000":[{"id":"CVE-2022-2758","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"xgrammar":[{"id":"CVE-2026-25048","sev":"HIGH","r":[{"exact":"*","eExc":"0.1.32"}],"src":"NVD"}]}
