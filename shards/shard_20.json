@@ -1,1 +1,1 @@
-{"200_series_smart_switches_software":[{"id":"CVE-2013-1154","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"2010":[{"id":"CVE-2013-2279","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"200_series_smart_switches_software":[{"id":"CVE-2013-1154","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"2010":[{"id":"CVE-2013-2279","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"202cms":[{"id":"CVE-2019-25538","sev":"HIGH","r":[{"exact":"10.0"}],"src":"NVD"},{"id":"CVE-2019-25539","sev":"HIGH","r":[{"exact":"10.0"}],"src":"NVD"}]}
