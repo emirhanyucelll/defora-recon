@@ -1,1 +1,1 @@
-{"bvpn":[{"id":"CVE-2021-43457","sev":"HIGH","r":[{"exact":"2.5.1"}],"src":"NVD-MOP"}]}
+{"bvpn":[{"id":"CVE-2021-43457","sev":"HIGH","r":[{"exact":"2.5.1"}],"src":"NVD-MOP"}],"bverse_convert":[{"id":"CVE-2024-49228","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}
