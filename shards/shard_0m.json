@@ -1,1 +1,1 @@
-{"0mk_shortener":[{"id":"CVE-2022-2933","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"},{"id":"CVE-2022-45361","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"0mk_shortener":[{"id":"CVE-2022-2933","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2022-45361","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
