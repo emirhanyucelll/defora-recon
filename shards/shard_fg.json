@@ -1,1 +1,1 @@
-{"fglrx-driver":[{"id":"CVE-2015-7723","sev":"HIGH","r":[{"exact":"14.4.2"}],"src":"NVD-MOP"},{"id":"CVE-2015-7724","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"fglrx-driver":[{"id":"CVE-2015-7723","sev":"HIGH","r":[{"exact":"14.4.2"}],"src":"NVD-MOP"},{"id":"CVE-2015-7724","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"fg_drupal":[{"id":"CVE-2024-31247","sev":"HIGH","r":[{"exact":"*","eExc":"3.71.0"}],"src":"NVD"}]}
