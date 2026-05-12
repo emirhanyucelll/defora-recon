@@ -1,0 +1,1 @@
+{"0din_scanner":[{"id":"CVE-2026-41512","sev":"HIGH","r":[{"exact":"*","sInc":"1.0.0","eExc":"1.4.1"}],"src":"NVD"}]}
