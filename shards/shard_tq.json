@@ -1,1 +1,1 @@
-{"tq_seo":[{"id":"CVE-2013-4871","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"tqdm":[{"id":"CVE-2016-10075","sev":"HIGH","r":[{"exact":"4.4.1"}],"src":"NVD"}]}
+{"tq_seo":[{"id":"CVE-2013-4871","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"tqdm":[{"id":"CVE-2016-10075","sev":"HIGH","r":[{"exact":"4.10"}],"src":"NVD"}]}

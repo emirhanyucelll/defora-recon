@@ -1,1 +1,1 @@
-{"uglifyjs":[{"id":"CVE-2015-8857","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2015-8858","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"uguu":[{"id":"CVE-2024-55279","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"uglifyjs":[{"id":"CVE-2015-8857","sev":"HIGH","r":[{"exact":"*","eExc":"2.4.24"}],"src":"NVD"},{"id":"CVE-2015-8858","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"uguu":[{"id":"CVE-2024-55279","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
