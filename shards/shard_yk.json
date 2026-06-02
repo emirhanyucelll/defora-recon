@@ -1,1 +1,1 @@
-{"ykneo-openpgp":[{"id":"CVE-2015-3298","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"ykm_crm":[{"id":"CVE-2023-1060","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"ykneo-openpgp":[{"id":"CVE-2015-3298","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"ykm_crm":[{"id":"CVE-2023-1060","sev":"HIGH","r":[{"exact":"*","eExc":"23.03.30"}],"src":"NVD"}]}
