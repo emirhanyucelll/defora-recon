@@ -1,1 +1,1 @@
-{"4d":[{"id":"CVE-2023-4770","sev":"HIGH","r":[{"exact":"19"}],"src":"NVD-MOP"}]}
+{"4d":[{"id":"CVE-2023-4770","sev":"HIGH","r":[{"exact":"19"}],"src":"NVD-MOP"}],"4diac_forte":[{"id":"CVE-2026-9158","sev":"HIGH","r":[{"exact":"*","sInc":"3.0.0"}],"src":"NVD"}]}
