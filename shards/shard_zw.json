@@ -1,1 +1,1 @@
-{"zwii":[{"id":"CVE-2011-0505","sev":"HIGH","r":[{"exact":"2.1.1"}],"src":"NVD-MOP"}],"zwserver":[{"id":"CVE-2017-16149","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"zwii":[{"id":"CVE-2011-0505","sev":"HIGH","r":[{"exact":"2.1.1"}],"src":"NVD-MOP"}],"zwserver":[{"id":"CVE-2017-16149","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"zwiicms":[{"id":"CVE-2025-57130","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}

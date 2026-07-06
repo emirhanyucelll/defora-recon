@@ -1,1 +1,1 @@
-{"fx_aggregator_terminal_client":[{"id":"CVE-2021-27187","sev":"HIGH","r":[{"exact":"1.0"}],"src":"NVD-MOP"},{"id":"CVE-2021-27188","sev":"HIGH","r":[{"exact":"1.0"}],"src":"NVD-MOP"}],"fxsound":[{"id":"CVE-2022-27438","sev":"HIGH","r":[{"exact":"1.1.12.0"}],"src":"NVD-MOP"}]}
+{"fx_aggregator_terminal_client":[{"id":"CVE-2021-27187","sev":"HIGH","r":[{"exact":"1.0"}],"src":"NVD-MOP"},{"id":"CVE-2021-27188","sev":"HIGH","r":[{"exact":"1.0"}],"src":"NVD-MOP"}],"fxsound":[{"id":"CVE-2022-27438","sev":"HIGH","r":[{"exact":"1.1.12.0"}],"src":"NVD"}]}
