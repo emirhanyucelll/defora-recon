@@ -1,1 +1,1 @@
-{"rlottie":[{"id":"CVE-2025-0634","sev":"HIGH","r":[{"exact":"0.2"}],"src":"NVD"}],"rlt_433":[{"id":"CVE-2022-25050","sev":"HIGH","r":[{"exact":"21.12"}],"src":"NVD-MOP"}]}
+{"rlottie":[{"id":"CVE-2025-0634","sev":"HIGH","r":[{"exact":"0.2"}],"src":"NVD"},{"id":"CVE-2026-18772","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD"},{"id":"CVE-2026-19517","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD"},{"id":"CVE-2026-19518","sev":"HIGH","r":[{"exact":"-"}],"src":"NVD"}],"rlt_433":[{"id":"CVE-2022-25050","sev":"HIGH","r":[{"exact":"21.12"}],"src":"NVD-MOP"}]}

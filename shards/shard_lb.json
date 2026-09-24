@@ -1,1 +1,1 @@
-{"lbstopattack":[{"id":"CVE-2022-3097","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}]}
+{"lbstopattack":[{"id":"CVE-2022-3097","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"}],"lbl_traceroute":[{"id":"CVE-2000-0949","sev":"HIGH","r":[{"exact":"1.4a5"}],"src":"NVD"}]}
