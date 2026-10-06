@@ -1,1 +1,1 @@
-{"ux_autocomplete":[{"id":"CVE-2023-41336","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"ux_autocomplete":[{"id":"CVE-2023-41336","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"uxplay":[{"id":"CVE-2025-60458","sev":"HIGH","r":[{"exact":"1.72"}],"src":"NVD"}]}
