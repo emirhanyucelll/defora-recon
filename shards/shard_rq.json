@@ -1,1 +1,1 @@
-{"rqm":[{"id":"CVE-2022-34809","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2022-34810","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2022-41241","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}]}
+{"rqm":[{"id":"CVE-2022-34809","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2022-34810","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD"},{"id":"CVE-2022-41241","sev":"HIGH","r":[{"exact":"*"}],"src":"NVD-MOP"}],"rquickjs":[{"id":"CVE-2024-58366","sev":"HIGH","r":[{"exact":"*","eExc":"0.4.2"}],"src":"NVD"}]}
