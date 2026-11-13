@@ -1,1 +1,1 @@
-{"nq_mobile_security_\\&_antivirus":[{"id":"CVE-2014-5672","sev":"HIGH","r":[{"exact":"7.2.16.00"}],"src":"NVD-MOP"}]}
+{"nq_mobile_security_\\&_antivirus":[{"id":"CVE-2014-5672","sev":"HIGH","r":[{"exact":"7.2.16.00"}],"src":"NVD-MOP"}],"nqsdaemon":[{"id":"CVE-2001-0891","sev":"HIGH","r":[{"exact":"3.3.0.16"}],"src":"NVD"}]}
